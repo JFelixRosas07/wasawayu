@@ -1,0 +1,321 @@
+/* ----------------- FUENTES Y VARIABLES OPTIMIZADAS ----------------- */
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Nunito:wght@400;500;600;700&display=swap');
+
+:root {
+  --andino-oscuro:   #1B4332;
+  --andino-hoja:     #2D6A4F;
+  --andino-dorado:   #FFB703;
+  --andino-terracota: #C44536;
+  --andino-azul:     #264653;
+  --text-dark:       #2E2E2E;
+  --text-light:      #6C757D;
+  --border-radius:   12px;
+  --transition:      0.3s ease;
+  --shadow-soft:     0 4px 20px rgba(27, 67, 50, 0.08);
+  --shadow-medium:   0 8px 30px rgba(27, 67, 50, 0.12);
+}
+
+/* ----------------- BASE RESPONSIVE ----------------- */
+body {
+  font-family: 'Nunito', sans-serif;
+  background: linear-gradient(135deg, #f5f7f5 0%, #e8f5e8 100%);
+  color: var(--text-dark);
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+
+/* ----------------- SIDEBAR RESPONSIVE ----------------- */
+.main-sidebar {
+  background: linear-gradient(180deg, var(--andino-oscuro) 0%, #0f241a 100%) !important;
+  transition: all var(--transition);
+}
+
+/* ============ LOGO - CONFIGURACIÓN OPTIMIZADA ============ */
+.brand-link {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  padding: 0 !important;
+  height: 220px !important;
+  background: transparent !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  transition: height 0.3s ease !important;
+}
+
+.brand-link .brand-image {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 240px !important;
+  max-height: 240px !important;
+  object-fit: contain !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  float: none !important;
+}
+
+.brand-link .brand-text {
+  display: none !important;
+}
+
+/* Sidebar colapsado (mini) - LOGO AJUSTADO */
+.sidebar-mini.sidebar-collapse .brand-link {
+  height: 70px !important;
+  padding: 0 !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  background: transparent !important;
+}
+
+.sidebar-mini.sidebar-collapse .brand-link .brand-image {
+  height: 90% !important;
+  width: auto !important;
+  max-width: 90% !important;
+  max-height: 90% !important;
+  margin: auto !important;
+  object-fit: contain !important;
+}
+/* ============ FIN LOGO ============ */
+
+.sidebar .nav-sidebar .nav-link {
+  color: rgba(255, 255, 255, 0.9);
+  padding: 0.75rem 1.25rem;
+  margin: 0.2rem 0.5rem;
+  border-radius: var(--border-radius);
+  transition: all var(--transition);
+  font-weight: 500;
+  font-family: 'Quicksand', sans-serif;
+}
+
+.sidebar .nav-sidebar .nav-link:hover,
+.sidebar .nav-sidebar .nav-link.active {
+  background: linear-gradient(90deg, var(--andino-hoja), var(--andino-oscuro)) !important;
+  color: #fff !important;
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* ----------------- NAVBAR RESPONSIVE ----------------- */
+.main-header {
+  background: linear-gradient(135deg, var(--andino-oscuro), var(--andino-hoja)) !important;
+  color: #fff !important;
+  border-bottom: none;
+  backdrop-filter: blur(10px);
+  min-height: 70px;
+}
+
+.main-header .nav-link,
+.main-header .navbar-nav .nav-item .nav-link {
+  color: #fff !important;
+  font-weight: 600;
+  font-family: 'Quicksand', sans-serif;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.main-header .nav-link:hover {
+  color: var(--andino-dorado) !important;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* ----------------- CONTENT WRAPPER RESPONSIVE - CORRECCIÓN ----------------- */
+.content-wrapper {
+  position: relative;
+  z-index: 1;
+  min-height: calc(100vh - 70px);
+  background: url('/images/fondo_campo.png') no-repeat center center fixed;
+  background-size: cover;
+  background-position: center 70%;
+}
+
+.content-wrapper::before {
+  content: "";
+  position: absolute;
+  top: 0; 
+  left: 0;
+  width: 100%; 
+  height: 100%;
+  backdrop-filter: blur(3px);
+  background: rgba(255, 255, 255, 0.6);
+  z-index: -1;
+}
+
+/* ----------------- CARDS - ESTILOS BASE QUE SE MANTIENEN ----------------- */
+.card {
+  background: rgba(255, 255, 255, 0.25) !important;
+  backdrop-filter: blur(12px) saturate(180%);
+  border-radius: var(--border-radius) !important;
+  border: 1px solid rgba(255, 255, 255, 0.35) !important;
+  box-shadow: var(--shadow-soft) !important;
+  transition: all var(--transition) !important;
+  margin-bottom: 1.25rem !important;
+  overflow: hidden;
+}
+
+.card:hover {
+  background: rgba(255, 255, 255, 0.35) !important;
+  backdrop-filter: blur(16px) saturate(200%);
+  transform: translateY(-4px) !important;
+  box-shadow: var(--shadow-medium) !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.card .card-header {
+  background: linear-gradient(135deg, var(--andino-oscuro) 0%, var(--andino-hoja) 100%) !important;
+  color: white !important;
+  border-radius: var(--border-radius) var(--border-radius) 0 0 !important;
+  font-weight: 700 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
+  padding: 1rem 1.25rem !important;
+  font-family: 'Quicksand', sans-serif;
+}
+
+.card .card-header .card-title {
+  color: white !important;
+  font-weight: 700 !important;
+  margin-bottom: 0 !important;
+  font-size: 1.1rem;
+}
+
+.card .card-body {
+  background: transparent !important;
+  border-radius: 0 0 var(--border-radius) var(--border-radius) !important;
+  padding: 1.25rem !important;
+}
+
+/* ----------------- MEDIA QUERIES CORREGIDAS ----------------- */
+
+/* Tablets pequeñas y móviles grandes - MANTENER FONDO ORIGINAL */
+@media (max-width: 768px) {
+  .content-wrapper {
+    /* SOLO CAMBIAR background-attachment, mantener la imagen */
+    background: url('/images/fondo_campo.png') no-repeat center center scroll;
+    background-size: cover;
+    background-position: center 70%;
+  }
+  
+  .content-wrapper::before {
+    backdrop-filter: blur(2px);
+    background: rgba(255, 255, 255, 0.5);
+  }
+  
+  /* LOGO RESPONSIVE - TABLETS */
+  .brand-link {
+    height: 180px !important;
+  }
+  
+  .brand-link .brand-image {
+    max-width: 200px !important;
+    max-height: 180px !important;
+  }
+  
+  .card {
+    /* MANTENER ESTILOS ORIGINALES, solo ajustar márgenes */
+    margin-bottom: 1rem !important;
+  }
+  
+  .card .card-header {
+    padding: 0.875rem 1rem !important;
+  }
+  
+  .card .card-body {
+    padding: 1rem !important;
+  }
+}
+
+/* Móviles - MANTENER FONDO ORIGINAL */
+@media (max-width: 576px) {
+  body {
+    font-size: 14px;
+  }
+  
+  .content-wrapper {
+    background: url('/images/fondo_campo.png') no-repeat center center scroll;
+    background-size: cover;
+    background-position: center 70%;
+  }
+  
+  /* LOGO RESPONSIVE - MÓVILES */
+  .brand-link {
+    height: 160px !important;
+  }
+  
+  .brand-link .brand-image {
+    max-width: 180px !important;
+    max-height: 160px !important;
+  }
+  
+  .main-header {
+    min-height: 60px;
+  }
+  
+  .content-wrapper {
+    min-height: calc(100vh - 60px);
+  }
+  
+  .sidebar .nav-sidebar .nav-link {
+    padding: 0.625rem 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .card .card-header .card-title {
+    font-size: 1rem;
+  }
+  
+  .btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+}
+
+/* Móviles muy pequeños - MANTENER FONDO ORIGINAL */
+@media (max-width: 375px) {
+  .content-wrapper {
+    background: url('/images/fondo_campo.png') no-repeat center center scroll;
+    background-size: cover;
+    background-position: center 70%;
+  }
+  
+  .content-wrapper::before {
+    backdrop-filter: blur(1px);
+    background: rgba(255, 255, 255, 0.4);
+  }
+  
+  /* LOGO RESPONSIVE - MÓVILES PEQUEÑOS */
+  .brand-link {
+    height: 140px !important;
+  }
+  
+  .brand-link .brand-image {
+    max-width: 160px !important;
+    max-height: 140px !important;
+  }
+  
+  .card .card-body {
+    padding: 0.875rem !important;
+  }
+  
+  .sidebar .nav-sidebar .nav-link {
+    padding: 0.5rem 0.875rem;
+    font-size: 0.85rem;
+  }
+  
+  .card {
+    /* Ajuste mínimo para móviles muy pequeños */
+    backdrop-filter: blur(10px) saturate(160%);
+  }
+}
+
+/* ----------------- GARANTIZAR CARDS EN SIDEBAR COLAPSADO ----------------- */
+.sidebar-mini.sidebar-collapse .content-wrapper .card,
+.sidebar-mini.sidebar-collapse .card {
+  background: rgba(255, 255, 255, 0.25) !important;
+  backdrop-filter: blur(12px) saturate(180%);
+  border-radius: var(--border-radius) !important;
+  border: 1px solid rgba(255, 255, 255, 0.35) !important;
+  box-shadow: var(--shadow-soft) !important;
+}

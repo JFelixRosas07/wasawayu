@@ -1,0 +1,59 @@
+/* ----------------- FONDO ----------------- */
+body.login-page {
+    background: url('/images/fondo_andino.jpg') no-repeat center center fixed;
+    background-size: cover;
+    font-family: 'Nunito', sans-serif;
+}
+
+/* ----------------- LOGO ----------------- */
+.logo-wasawayu {
+    width: 200px;
+    height: auto;
+    border-radius: 12px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+    object-fit: cover;
+}
+
+/* ----------------- CARD LOGIN ----------------- */
+.login-box .card,
+.login-card-body {
+    background: rgba(255, 255, 255, 0.85) !important;
+    backdrop-filter: blur(10px);
+    border-radius: 16px !important;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 8px 24px rgba(27, 67, 50, 0.15);
+    transition: all 0.3s ease-in-out;
+}
+
+.login-box .card:hover {
+    background: rgba(255, 255, 255, 0.92) !important;
+    transform: translateY(-3px);
+    box-shadow: 0 12px 36px rgba(27, 67, 50, 0.2);
+}
+
+/* ----------------- INPUTS ----------------- */
+.custom-input {
+    border-radius: 10px 0 0 10px !important;
+    border: 1px solid #ccc;
+    transition: all 0.3s ease;
+}
+
+.custom-input:focus {
+    border-color: var(--andino-hoja);
+    box-shadow: 0 0 8px rgba(45, 106, 79, 0.3);
+}
+
+/* ----------------- BOTÓN LOGIN ----------------- */
+.btn-success {
+    background-color: var(--andino-oscuro) !important;
+    border-color: var(--andino-oscuro) !important;
+    font-weight: bold;
+    border-radius: 10px;
+    transition: all 0.3s ease-in-out;
+}
+
+.btn-success:hover {
+    background: linear-gradient(90deg, var(--andino-hoja), var(--andino-oscuro)) !important;
+    border-color: var(--andino-hoja) !important;
+    transform: scale(1.02);
+}
