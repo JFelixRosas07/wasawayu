@@ -1,6 +1,6 @@
 @extends('adminlte::page')
 
-@section('title', 'Dashboard')
+@section('title', 'Wasawayu - Inicio')
 
 @section('content')
 <div class="row">
@@ -17,12 +17,12 @@
         </div>
     </div>
 
-    <!-- KPIs -->
+    <!-- KPIs con DATOS REALES -->
     <div class="col-md-3 mb-3">
         <div class="card border-0 shadow-sm stat-card">
             <div class="card-body text-center">
                 <i class="fas fa-users text-success fa-2x mb-2"></i>
-                <h5 class="fw-bold">12</h5>
+                <h5 class="fw-bold">{{ $totalAgricultores }}</h5>
                 <p class="text-muted mb-0 small">Agricultores</p>
             </div>
         </div>
@@ -31,7 +31,7 @@
         <div class="card border-0 shadow-sm stat-card">
             <div class="card-body text-center">
                 <i class="fas fa-map text-primary fa-2x mb-2"></i>
-                <h5 class="fw-bold">34</h5>
+                <h5 class="fw-bold">{{ $totalParcelas }}</h5>
                 <p class="text-muted mb-0 small">Parcelas</p>
             </div>
         </div>
@@ -40,7 +40,7 @@
         <div class="card border-0 shadow-sm stat-card">
             <div class="card-body text-center">
                 <i class="fas fa-leaf text-warning fa-2x mb-2"></i>
-                <h5 class="fw-bold">18</h5>
+                <h5 class="fw-bold">{{ $totalCultivos }}</h5>
                 <p class="text-muted mb-0 small">Cultivos</p>
             </div>
         </div>
@@ -49,7 +49,7 @@
         <div class="card border-0 shadow-sm stat-card">
             <div class="card-body text-center">
                 <i class="fas fa-sync-alt text-danger fa-2x mb-2"></i>
-                <h5 class="fw-bold">8</h5>
+                <h5 class="fw-bold">{{ $totalRotaciones }}</h5>
                 <p class="text-muted mb-0 small">Rotaciones</p>
             </div>
         </div>

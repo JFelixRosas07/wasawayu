@@ -12,18 +12,19 @@
 @stop
 
 @section('auth_body')
-    {{-- Errores de validación --}}
-    @if ($errors->any())
-        <div class="alert alert-danger">
-            @foreach ($errors->all() as $error)
-                <div>{{ $error }}</div>
-            @endforeach
+    {{-- Mensaje de error general --}}
+    @if ($errors->has('error'))
+        <div class="alert alert-danger text-center">
+            <i class="fas fa-exclamation-circle"></i>
+            {{ $errors->first('error') }}
         </div>
     @endif
 
     {{-- Mensajes de estado --}}
     @if (session('status'))
-        <div class="alert alert-success">{{ session('status') }}</div>
+        <div class="alert alert-success text-center">
+            {{ session('status') }}
+        </div>
     @endif
 
     <form action="{{ route('login') }}" method="post">
@@ -40,9 +41,6 @@
                 </div>
             </div>
         </div>
-        @error('email')
-            <small class="text-danger d-block mb-2">{{ $message }}</small>
-        @enderror
 
         {{-- Password --}}
         <div class="input-group mb-3">
@@ -55,10 +53,6 @@
                 </div>
             </div>
         </div>
-        @error('password')
-            <small class="text-danger d-block mb-2">{{ $message }}</small>
-        @enderror
-
         {{-- Captcha: solo a partir del 3er intento fallido --}}
         @php
             $limiter = app(\Illuminate\Cache\RateLimiter::class);

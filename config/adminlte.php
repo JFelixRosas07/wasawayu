@@ -120,11 +120,11 @@ return [
         'enabled' => true,
         'mode' => 'fullscreen',
         'img' => [
-            'path' => 'vendor/adminlte/dist/img/AdminLTELogo.png',
-            'alt' => 'AdminLTE Preloader Image',
+            'path' => 'images/inti.png', // <-- ¡Así debe quedar!
+            'alt' => 'Cargando Inti...',
             'effect' => 'animation__shake',
-            'width' => 60,
-            'height' => 60,
+            'width' => 180,
+            'height' => 200,
         ],
     ],
 
@@ -306,49 +306,46 @@ return [
     */
 
     'menu' => [
-
-        // Usuarios (solo admin puede ver)
+        [
+            'text' => 'Mi Perfil',
+            'route' => 'perfil',
+            'icon' => 'fas fa-user',
+            'can' => 'ver-perfil',
+        ],
         [
             'text' => 'Usuarios',
             'route' => 'users.index',
             'icon' => 'fas fa-users',
             'can' => 'manage-users',
         ],
-
-        // Parcelas
         [
             'text' => 'Parcelas',
             'route' => 'parcelas.index',
             'icon' => 'fas fa-map-marked-alt',
         ],
-
-        // Cultivos
         [
             'text' => 'Cultivos',
             'route' => 'cultivos.index',
             'icon' => 'fas fa-seedling',
         ],
-
-        // Planes de Rotación
+        // 🔁 NUEVO MENÚ ÚNICO PARA ROTACIONES
         [
             'text' => 'Rotaciones',
-            'route' => 'planes.index', // ahora apunta al index del PlanRotacionController
+            'route' => 'admin.rotaciones.dashboard',
             'icon' => 'fas fa-sync-alt',
+            'can' => ['ver-rotaciones'],
         ],
-
         [
             'text' => 'Clima',
             'route' => 'clima.index',
             'icon' => 'fas fa-cloud-sun',
         ],
-
         [
             'text' => 'Reportes',
             'route' => 'reportes.index',
             'icon' => 'fas fa-chart-bar',
         ],
     ],
-
 
 
 

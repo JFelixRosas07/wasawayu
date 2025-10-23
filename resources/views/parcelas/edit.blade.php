@@ -3,7 +3,12 @@
 @section('title', 'Editar Parcela')
 
 @section('content_header')
-    <h1><i class="fas fa-edit"></i> Editar Parcela</h1>
+    <div class="d-flex justify-content-between align-items-center">
+        <h1><i class="fas fa-edit"></i> Editar Parcela</h1>
+        <a href="{{ route('parcelas.index') }}" class="btn btn-secondary btn-sm">
+            <i class="fas fa-arrow-left"></i> Volver al Listado
+        </a>
+    </div>
 @stop
 
 @section('content')
@@ -21,7 +26,7 @@
             @method('PUT')
 
             <div class="form-group">
-                <label>Agricultor</label>
+                <label><i class="fas fa-user"></i> Agricultor</label>
                 <select name="agricultor_id" class="form-control" required>
                     @foreach($agricultores as $id => $nombre)
                         <option value="{{ $id }}" @if($id == $parcela->agricultor_id) selected @endif>
@@ -32,22 +37,22 @@
             </div>
 
             <div class="form-group">
-                <label>Nombre</label>
-                <input type="text" name="nombre" value="{{ $parcela->nombre }}" class="form-control" required>
+                <label><i class="fas fa-signature"></i> Nombre</label>
+                <input type="text" name="nombre" value="{{ old('nombre', $parcela->nombre) }}" class="form-control" required>
             </div>
 
             <div class="form-group">
-                <label>Superficie (m²)</label>
-                <input type="number" step="0.01" name="extension" value="{{ $parcela->extension }}" class="form-control" required>
+                <label><i class="fas fa-ruler-combined"></i> Superficie (m²)</label>
+                <input type="number" step="0.01" name="extension" value="{{ old('extension', $parcela->extension) }}" class="form-control" required>
             </div>
 
             <div class="form-group">
-                <label>Ubicación</label>
-                <input type="text" name="ubicacion" value="{{ $parcela->ubicacion }}" class="form-control" required>
+                <label><i class="fas fa-map-marker-alt"></i> Ubicación</label>
+                <input type="text" name="ubicacion" value="{{ old('ubicacion', $parcela->ubicacion) }}" class="form-control" required>
             </div>
 
             <div class="form-group">
-                <label>Tipo de Suelo</label>
+                <label><i class="fas fa-mountain"></i> Tipo de Suelo</label>
                 <select name="tipoSuelo" class="form-control" required>
                     <option value="Arenoso" @if($parcela->tipoSuelo=="Arenoso") selected @endif>Arenoso</option>
                     <option value="Arcilloso" @if($parcela->tipoSuelo=="Arcilloso") selected @endif>Arcilloso</option>
@@ -58,7 +63,7 @@
             </div>
 
             <div class="form-group">
-                <label>Uso del Suelo</label>
+                <label><i class="fas fa-tractor"></i> Uso del Suelo</label>
                 <select name="usoSuelo" class="form-control" required>
                     <option value="Agrícola" @if($parcela->usoSuelo=="Agrícola") selected @endif>Agrícola</option>
                     <option value="Ganadero" @if($parcela->usoSuelo=="Ganadero") selected @endif>Ganadero</option>
@@ -68,14 +73,18 @@
             </div>
 
             <div class="form-group">
-                <label>Editar polígono en el mapa</label>
+                <label><i class="fas fa-draw-polygon"></i> Editar polígono en el mapa</label>
                 <div id="map" style="height:400px;"></div>
                 <input type="hidden" name="poligono" id="poligono" value='@json($parcela->poligono)'>
             </div>
 
-            <div class="text-right">
-                <button class="btn btn-success"><i class="fas fa-save"></i> Actualizar</button>
-                <a href="{{ route('parcelas.index') }}" class="btn btn-secondary"><i class="fas fa-times"></i> Cancelar</a>
+            <div class="text-right mt-4">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-save"></i> Actualizar Parcela
+                </button>
+                <a href="{{ route('parcelas.show', $parcela) }}" class="btn btn-info">
+                    <i class="fas fa-eye"></i> Ver Detalles
+                </a>
             </div>
         </form>
     </div>
@@ -86,6 +95,16 @@
 <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css"/>
+<style>
+    .card {
+        border: none;
+        border-radius: 10px;
+    }
+    .btn {
+        border-radius: 6px;
+        margin-left: 5px;
+    }
+</style>
 @stop
 
 @section('js')

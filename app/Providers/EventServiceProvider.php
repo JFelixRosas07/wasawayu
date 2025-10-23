@@ -7,6 +7,10 @@ use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Event;
 
+// 👇 Importamos los modelos y observers nuevos
+use App\Models\DetalleRotacion;
+use App\Observers\DetalleRotacionObserver;
+
 class EventServiceProvider extends ServiceProvider
 {
     /**
@@ -25,7 +29,8 @@ class EventServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // 👇 Registramos el observer
+        DetalleRotacion::observe(DetalleRotacionObserver::class);
     }
 
     /**

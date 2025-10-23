@@ -12,7 +12,9 @@ return new class extends Migration {
     {
         Schema::create('planes_rotacion', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('parcela_id')->constrained('parcelas')->onDelete('cascade');
+            $table->foreignId('parcela_id')
+                ->constrained('parcelas')
+                ->onDelete('restrict'); // Impide borrar una parcela en uso
             $table->string('nombre'); // Ej: Plan 2025-2029
             $table->integer('anios')->default(4);
             $table->foreignId('creado_por')->constrained('users');

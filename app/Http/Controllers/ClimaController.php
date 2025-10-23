@@ -69,11 +69,11 @@ class ClimaController extends Controller
                 if ($response->successful()) {
                     return $response->json();
                 } else {
-                    \Log::error('Error API Clima: ' . $response->status());
+                    \Log::error('error api clima: ' . $response->status());
                     return $this->datosPrueba();
                 }
             } catch (\Exception $e) {
-                \Log::error('Error obteniendo clima: ' . $e->getMessage());
+                \Log::error('error obteniendo clima: ' . $e->getMessage());
                 return $this->datosPrueba();
             }
         });
@@ -97,7 +97,7 @@ class ClimaController extends Controller
                     return $this->pronosticoPrueba();
                 }
             } catch (\Exception $e) {
-                \Log::error('Error obteniendo pronóstico: ' . $e->getMessage());
+                \Log::error('error obteniendo pronostico: ' . $e->getMessage());
                 return $this->pronosticoPrueba();
             }
         });
@@ -118,7 +118,7 @@ class ClimaController extends Controller
                 return $response->json();
             }
         } catch (\Exception $e) {
-            \Log::error('Error obteniendo clima por coordenadas: ' . $e->getMessage());
+            \Log::error('error obteniendo clima por coordenadas: ' . $e->getMessage());
         }
 
         return $this->datosPrueba();
@@ -158,91 +158,91 @@ class ClimaController extends Controller
 
         $temperatura = $clima['main']['temp'];
         $humedad = $clima['main']['humidity'];
-        $viento = $clima['wind']['speed'] * 3.6; // Convertir a km/h
+        $viento = $clima['wind']['speed'] * 3.6; // convertir a km/h
         $lluvia = $clima['rain']['1h'] ?? 0;
 
-        // 1. ALERTA DE HELADAS (para cultivos andinos sensibles)
+        // alerta de heladas para cultivos andinos sensibles
         if ($temperatura < 5) {
             $alertas[] = [
                 'tipo' => 'helada',
                 'nivel' => 'alto',
-                'mensaje' => '⚠️ Riesgo ALTO de Heladas',
-                'descripcion' => 'Temperatura crítica para cultivos sensibles',
+                'mensaje' => 'riesgo alto de heladas',
+                'descripcion' => 'temperatura critica para cultivos sensibles',
                 'icono' => 'fas fa-temperature-low',
-                'accion' => 'Cubrir papa, oca y papalisa. Evitar riego nocturno.',
-                'condicion' => "Temperatura: {$temperatura}°C"
+                'accion' => 'cubrir papa, oca y papalisa. evitar riego nocturno.',
+                'condicion' => "temperatura: {$temperatura}°c"
             ];
         } elseif ($temperatura < 8) {
             $alertas[] = [
                 'tipo' => 'helada',
                 'nivel' => 'medio',
-                'mensaje' => '⚠️ Posible Helada Nocturna',
-                'descripcion' => 'Temperatura baja, monitorear durante la noche',
+                'mensaje' => 'posible helada nocturna',
+                'descripcion' => 'temperatura baja, monitorear durante la noche',
                 'icono' => 'fas fa-temperature-low',
-                'accion' => 'Preparar cobertores para cultivos sensibles',
-                'condicion' => "Temperatura: {$temperatura}°C"
+                'accion' => 'preparar cobertores para cultivos sensibles',
+                'condicion' => "temperatura: {$temperatura}°c"
             ];
         }
 
-        // 2. ALERTA DE LLUVIA INTENSA
+        // alerta de lluvia intensa
         if ($lluvia > 15) {
             $alertas[] = [
                 'tipo' => 'lluvia_intensa',
                 'nivel' => 'alto',
-                'mensaje' => '🌧️ Lluvia Intensa',
-                'descripcion' => 'Precipitación fuerte detectada',
+                'mensaje' => 'lluvia intensa',
+                'descripcion' => 'precipitacion fuerte detectada',
                 'icono' => 'fas fa-cloud-rain',
-                'accion' => 'Revisar drenajes y evitar labores en campo',
-                'condicion' => "Lluvia: {$lluvia}mm/h"
+                'accion' => 'revisar drenajes y evitar labores en campo',
+                'condicion' => "lluvia: {$lluvia}mm/h"
             ];
         } elseif ($lluvia > 5) {
             $alertas[] = [
                 'tipo' => 'lluvia',
                 'nivel' => 'medio',
-                'mensaje' => '🌧️ Lluvia Moderada',
-                'descripcion' => 'Precipitación en curso',
+                'mensaje' => 'lluvia moderada',
+                'descripcion' => 'precipitacion en curso',
                 'icono' => 'fas fa-cloud-rain',
-                'accion' => 'Adecuado para riego natural',
-                'condicion' => "Lluvia: {$lluvia}mm/h"
+                'accion' => 'adecuado para riego natural',
+                'condicion' => "lluvia: {$lluvia}mm/h"
             ];
         }
 
-        // 3. ALERTA DE VIENTO FUERTE
+        // alerta de viento fuerte
         if ($viento > 40) {
             $alertas[] = [
                 'tipo' => 'viento_fuerte',
                 'nivel' => 'alto',
-                'mensaje' => '💨 Vientos Fuertes',
-                'descripcion' => 'Vientos que pueden dañar cultivos',
+                'mensaje' => 'vientos fuertes',
+                'descripcion' => 'vientos que pueden dañar cultivos',
                 'icono' => 'fas fa-wind',
-                'accion' => 'Asegurar invernaderos y estructuras ligeras',
-                'condicion' => "Viento: {$viento} km/h"
+                'accion' => 'asegurar invernaderos y estructuras ligeras',
+                'condicion' => "viento: {$viento} km/h"
             ];
         }
 
-        // 4. ALERTA DE SEQUÍA (humedad baja)
+        // alerta de sequia humedad baja
         if ($humedad < 30 && $lluvia == 0) {
             $alertas[] = [
                 'tipo' => 'sequia',
                 'nivel' => 'medio',
-                'mensaje' => '🏜️ Condiciones Secas',
-                'descripcion' => 'Humedad baja sin precipitaciones',
+                'mensaje' => 'condiciones secas',
+                'descripcion' => 'humedad baja sin precipitaciones',
                 'icono' => 'fas fa-sun',
-                'accion' => 'Programar riego adicional para cultivos',
-                'condicion' => "Humedad: {$humedad}%"
+                'accion' => 'programar riego adicional para cultivos',
+                'condicion' => "humedad: {$humedad}%"
             ];
         }
 
-        // 5. ALERTA DE CALOR EXTREMO
+        // alerta de calor extremo
         if ($temperatura > 28) {
             $alertas[] = [
                 'tipo' => 'calor',
                 'nivel' => 'medio',
-                'mensaje' => '☀️ Temperaturas Altas',
-                'descripcion' => 'Calor que puede afectar cultivos',
+                'mensaje' => 'temperaturas altas',
+                'descripcion' => 'calor que puede afectar cultivos',
                 'icono' => 'fas fa-temperature-high',
-                'accion' => 'Aumentar frecuencia de riego, evitar horas pico',
-                'condicion' => "Temperatura: {$temperatura}°C"
+                'accion' => 'aumentar frecuencia de riego, evitar horas pico',
+                'condicion' => "temperatura: {$temperatura}°c"
             ];
         }
 

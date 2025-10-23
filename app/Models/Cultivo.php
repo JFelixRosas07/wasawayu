@@ -22,18 +22,21 @@ class Cultivo extends Model
         'imagen',
     ];
 
-    // Casts: para convertir atributos si fuera necesario
     protected $casts = [
         'diasCultivo' => 'integer',
     ];
 
-    /*--------------------------------------------
-    | RELACIONES
-    ---------------------------------------------*/
+    // relaciones
 
-    // Un cultivo puede estar en muchos detalles de rotación
+    // un cultivo puede estar en muchos detalles de rotacion planificados
     public function detallesRotacion()
     {
         return $this->hasMany(DetalleRotacion::class, 'cultivo_id');
+    }
+
+    // un cultivo puede aparecer en varias ejecuciones reales
+    public function ejecucionesRotacion()
+    {
+        return $this->hasMany(EjecucionRotacion::class, 'cultivo_real_id');
     }
 }

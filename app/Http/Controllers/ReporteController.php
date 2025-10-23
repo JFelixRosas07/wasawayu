@@ -3,206 +3,236 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use App\Models\User;
 use App\Models\Parcela;
-use App\Models\Cultivo;
 use App\Models\PlanRotacion;
 use App\Models\DetalleRotacion;
 use App\Models\EjecucionRotacion;
-use App\Models\User;
+use App\Models\Cultivo;
 
 class ReporteController extends Controller
 {
     public function index()
     {
-        $estadisticas = $this->obtenerEstadisticasGenerales();
-        $datosGraficos = $this->obtenerDatosParaGraficos();
-        
-        return view('reportes.index', compact('estadisticas', 'datosGraficos'));
+        $usuario = auth()->user();
+
+        $parcelas = Parcela::when($usuario->hasRole('Agricultor'), fn($q) => $q->where('agricultor_id', $usuario->id));
+        $cultivos = Cultivo::query();
+        $planes = PlanRotacion::when($usuario->hasRole('Agricultor'), fn($q) => $q->whereHas('parcela', fn($s) => $s->where('agricultor_id', $usuario->id)));
+        $ejecuciones = EjecucionRotacion::when($usuario->hasRole('Agricultor'), fn($q) => $q->whereHas('detalle.plan.parcela', fn($s) => $s->where('agricultor_id', $usuario->id)));
+
+        $metricas = [
+            'parcelas' => ['total_parcelas' => $parcelas->count()],
+            'cultivos' => [
+                'total_cultivos' => $cultivos->count(),
+                'por_categoria' => $cultivos->selectRaw('categoria, COUNT(*) as total')->groupBy('categoria')->get(),
+            ],
+            'rotaciones' => [
+                'total_planes' => $planes->count(),
+                'por_estado' => collect([
+                    ['estado' => 'Planificado', 'total' => $planes->where('anio_inicio', '>=', now()->year)->count()],
+                    ['estado' => 'En ejecución', 'total' => $planes->where('anio_inicio', '<', now()->year)->count()],
+                ]),
+            ],
+            'ejecuciones' => ['total_ejecuciones' => $ejecuciones->count()],
+        ];
+
+        return view('reportes.index', compact('metricas', 'usuario'));
     }
 
-    public function parcelas()
+    public function parcelasAgricultor()
     {
-        $parcelas = Parcela::with('agricultor')->get();
-        $datosGraficos = $this->obtenerDatosParcelas();
-        
-        return view('reportes.parcelas', compact('parcelas', 'datosGraficos'));
+        $usuario = Auth::user();
+        $agricultores = $usuario->hasRole(['Administrador', 'TecnicoAgronomo'])
+            ? User::role('Agricultor')->get()
+            : collect([$usuario]);
+        return view('reportes.reporte-parcelas-agricultor', compact('agricultores', 'usuario'));
+    }
+
+    public function rotacionAgricultor()
+    {
+        $usuario = Auth::user();
+        $agricultores = $usuario->hasRole(['Administrador', 'TecnicoAgronomo'])
+            ? User::role('Agricultor')->get()
+            : collect([$usuario]);
+        return view('reportes.reporte-rotacion-agricultor', compact('agricultores'));
     }
 
     public function cultivos()
     {
-        $cultivos = Cultivo::all();
-        $datosGraficos = $this->obtenerDatosCultivos();
-        
-        return view('reportes.cultivos', compact('cultivos', 'datosGraficos'));
-    }
-
-    public function rotaciones()
-    {
-        $rotaciones = PlanRotacion::with(['parcela', 'detalles.cultivo'])->get();
-        $datosGraficos = $this->obtenerDatosRotaciones();
-        
-        return view('reportes.rotaciones', compact('rotaciones', 'datosGraficos'));
+        return view('reportes.reporte-cultivos');
     }
 
     public function ejecuciones()
     {
-        $ejecuciones = EjecucionRotacion::with(['detalle.plan.parcela', 'detalle.cultivo'])->get();
-        $datosGraficos = $this->obtenerDatosEjecuciones();
-        
-        return view('reportes.ejecuciones', compact('ejecuciones', 'datosGraficos'));
+        return view('reportes.reporte-ejecuciones');
     }
 
-    public function generarPDF(Request $request)
+    public function parcelasData($id)
     {
-        $tipo = $request->get('tipo', 'general');
-        
-        // Lógica para generar PDF (puedes usar DomPDF o similar)
-        return response()->json(['message' => 'PDF generado para: ' . $tipo]);
-    }
+        $usuario = Auth::user();
 
-    public function obtenerDatosGrafico(Request $request)
-    {
-        $tipo = $request->get('tipo');
-        
-        switch($tipo) {
-            case 'cultivos_categoria':
-                return response()->json($this->obtenerCultivosPorCategoria());
-            case 'parcelas_suelo':
-                return response()->json($this->obtenerParcelasPorTipoSuelo());
-            case 'rotaciones_estado':
-                return response()->json($this->obtenerRotacionesPorEstado());
-            case 'ejecuciones_mensual':
-                return response()->json($this->obtenerEjecucionesMensuales());
-            default:
-                return response()->json([]);
+        if ($usuario->hasRole('Agricultor')) {
+            if ($id !== (string) $usuario->id && $id !== 'todos') abort(403);
+            $id = $usuario->id;
         }
+
+        $parcelas = $id === 'todos'
+            ? Parcela::with(['agricultor', 'planesRotacion'])->get()
+            : Parcela::with(['agricultor', 'planesRotacion'])->where('agricultor_id', $id)->get();
+
+        $resultado = $parcelas->map(function ($p) {
+            $superficie = $p->extension !== null && $p->extension !== ''
+                ? (is_numeric($p->extension) ? number_format((float) $p->extension, 2) : $p->extension)
+                : '—';
+
+            return [
+                'id' => $p->id,
+                'nombre' => $p->nombre ?? 'Sin nombre',
+                'superficie' => $superficie,
+                'ubicacion' => $p->ubicacion ?? '—',
+                'tipo_suelo' => $p->tipoSuelo ?? '—',
+                'estado' => $p->estado ?? 'Activa',
+                'agricultor' => ['nombre' => $p->agricultor?->name ?? 'Sin asignar'],
+                'planes' => $p->planesRotacion?->pluck('nombre') ?? [],
+            ];
+        });
+
+        return response()->json($resultado);
     }
 
-    private function obtenerEstadisticasGenerales()
+    public function planesData($id)
     {
-        return [
-            'total_parcelas' => Parcela::count(),
-            'total_cultivos' => Cultivo::count(),
-            'total_rotaciones' => PlanRotacion::count(),
-            'total_ejecuciones' => EjecucionRotacion::count(),
-            'superficie_total' => Parcela::sum('extension'),
-            'agricultores_activos' => User::role('Agricultor')->where('estado', 1)->count(),
-            'rotaciones_ejecutandose' => PlanRotacion::where('estado', 'en_ejecucion')->count(),
-            'cultivos_mas_usados' => $this->obtenerCultivosMasUsados()
-        ];
+        $usuario = Auth::user();
+        $planes = PlanRotacion::where('parcela_id', $id)
+            ->when($usuario->hasRole('Agricultor'), fn($q) => $q->whereHas('parcela', fn($s) => $s->where('agricultor_id', $usuario->id)))
+            ->select('id', 'nombre', 'anio_inicio')
+            ->get();
+        return response()->json($planes);
     }
 
-    private function obtenerDatosParaGraficos()
+    public function detallesData($id)
     {
-        return [
-            'cultivos_categoria' => $this->obtenerCultivosPorCategoria(),
-            'parcelas_suelo' => $this->obtenerParcelasPorTipoSuelo(),
-            'rotaciones_estado' => $this->obtenerRotacionesPorEstado(),
-            'ejecuciones_mensual' => $this->obtenerEjecucionesMensuales()
-        ];
-    }
+        $usuario = Auth::user();
 
-    private function obtenerCultivosPorCategoria()
-    {
-        return Cultivo::selectRaw('categoria, COUNT(*) as total')
-            ->groupBy('categoria')
+        $detalles = DetalleRotacion::with(['cultivo', 'ejecuciones'])
+            ->where('plan_id', $id)
+            ->when($usuario->hasRole('Agricultor'), fn($q) => $q->whereHas('plan.parcela', fn($s) => $s->where('agricultor_id', $usuario->id)))
             ->get()
-            ->pluck('total', 'categoria')
-            ->toArray();
-    }
+            ->map(function ($d) {
+                if ($d->es_descanso) {
+                    return [
+                        'anio' => "Año {$d->anio}",
+                        'cultivo' => ['nombre' => 'Descanso', 'imagen' => asset('images/descanso.png')],
+                        'es_descanso' => 'Sí',
+                        'fechas' => ($d->fecha_inicio && $d->fecha_fin)
+                            ? $d->fecha_inicio->format('d/m/Y') . ' – ' . $d->fecha_fin->format('d/m/Y')
+                            : '-',
+                        'ejecucion' => 'Planificado',
+                    ];
+                }
 
-    private function obtenerParcelasPorTipoSuelo()
-    {
-        return Parcela::selectRaw('tipoSuelo, COUNT(*) as total')
-            ->groupBy('tipoSuelo')
-            ->get()
-            ->pluck('total', 'tipoSuelo')
-            ->toArray();
-    }
+                $imagen = $d->cultivo?->imagen ? asset($d->cultivo->imagen) : asset('images/cultivos/default.png');
+                $estado = 'Pendiente';
 
-    private function obtenerRotacionesPorEstado()
-    {
-        return PlanRotacion::selectRaw('estado, COUNT(*) as total')
-            ->groupBy('estado')
-            ->get()
-            ->pluck('total', 'estado')
-            ->toArray();
-    }
+                if ($d->ejecuciones->isNotEmpty()) {
+                    $ultima = $d->ejecuciones->sortByDesc('fecha_siembra')->first();
+                    $estado = match ($ultima->estado) {
+                        'en_ejecucion' => 'En ejecución',
+                        'planificado' => 'Planificado',
+                        default => 'Finalizado',
+                    };
+                } else {
+                    $hoy = now();
+                    if ($hoy->between($d->fecha_inicio, $d->fecha_fin)) $estado = 'En ejecución';
+                    elseif ($hoy->lt($d->fecha_inicio)) $estado = 'Planificado';
+                }
 
-    private function obtenerEjecucionesMensuales()
-    {
-        return EjecucionRotacion::selectRaw('MONTH(created_at) as mes, COUNT(*) as total')
-            ->whereYear('created_at', date('Y'))
-            ->groupBy('mes')
-            ->get()
-            ->pluck('total', 'mes')
-            ->toArray();
-    }
-
-    private function obtenerCultivosMasUsados($limite = 5)
-    {
-        return DetalleRotacion::whereNotNull('cultivo_id')
-            ->selectRaw('cultivo_id, COUNT(*) as total')
-            ->groupBy('cultivo_id')
-            ->with('cultivo')
-            ->orderByDesc('total')
-            ->limit($limite)
-            ->get()
-            ->map(function($item) {
                 return [
-                    'nombre' => $item->cultivo->nombre,
-                    'total' => $item->total
+                    'anio' => "Año {$d->anio}",
+                    'cultivo' => ['nombre' => $d->cultivo?->nombre ?? '-', 'imagen' => $imagen],
+                    'es_descanso' => 'No',
+                    'fechas' => ($d->fecha_inicio && $d->fecha_fin)
+                        ? $d->fecha_inicio->format('d/m/Y') . ' – ' . $d->fecha_fin->format('d/m/Y')
+                        : '-',
+                    'ejecucion' => $estado,
                 ];
             });
+
+        return response()->json($detalles);
     }
 
-    private function obtenerDatosParcelas()
+    public function cultivosData()
     {
-        return [
-            'por_tipo_suelo' => $this->obtenerParcelasPorTipoSuelo(),
-            'por_uso_suelo' => Parcela::selectRaw('usoSuelo, COUNT(*) as total')
-                ->groupBy('usoSuelo')
-                ->get()
-                ->pluck('total', 'usoSuelo')
-                ->toArray(),
-            'extension_promedio' => Parcela::avg('extension')
-        ];
+        $cultivos = Cultivo::withCount(['detallesRotacion', 'ejecucionesRotacion'])->get();
+        $totalUsos = max(1, $cultivos->sum(fn($c) => $c->detalles_rotacion_count + $c->ejecuciones_rotacion_count));
+
+        $resultado = $cultivos->map(function ($c) use ($totalUsos) {
+            $total = $c->detalles_rotacion_count + $c->ejecuciones_rotacion_count;
+            $porcentaje = round(($total / $totalUsos) * 100, 2);
+
+            return [
+                'id' => $c->id,
+                'nombre' => $c->nombre ?? '—',
+                'categoria' => $c->categoria ?? '—',
+                'variedad' => $c->variedad ?? '—',
+                'cargaSuelo' => $c->cargaSuelo ?? '—',
+                'epocaSiembra' => $c->epocaSiembra ?? '—',
+                'epocaCosecha' => $c->epocaCosecha ?? '—',
+                'cantidad' => $total,
+                'porcentaje' => $porcentaje,
+            ];
+        });
+
+        return response()->json($resultado);
     }
 
-    private function obtenerDatosCultivos()
+    public function ejecucionesData()
     {
-        return [
-            'por_categoria' => $this->obtenerCultivosPorCategoria(),
-            'por_carga_suelo' => Cultivo::selectRaw('cargaSuelo, COUNT(*) as total')
-                ->groupBy('cargaSuelo')
-                ->get()
-                ->pluck('total', 'cargaSuelo')
-                ->toArray(),
-            'duracion_promedio' => Cultivo::avg('diasCultivo')
-        ];
-    }
+        $usuario = auth()->user();
 
-    private function obtenerDatosRotaciones()
-    {
-        return [
-            'por_estado' => $this->obtenerRotacionesPorEstado(),
-            'por_anios' => PlanRotacion::selectRaw('anios, COUNT(*) as total')
-                ->groupBy('anios')
-                ->get()
-                ->pluck('total', 'anios')
-                ->toArray()
-        ];
-    }
+        $ejecuciones = EjecucionRotacion::with([
+            'detalle.plan.parcela.agricultor',
+            'cultivoReal',
+            'detalle.cultivo'
+        ])
+            ->when($usuario->hasRole('Agricultor'), fn($q) => $q->whereHas('detalle.plan.parcela', fn($s) => $s->where('agricultor_id', $usuario->id)))
+            ->get();
 
-    private function obtenerDatosEjecuciones()
-    {
-        return [
-            'por_estado' => EjecucionRotacion::selectRaw('estado, COUNT(*) as total')
-                ->groupBy('estado')
-                ->get()
-                ->pluck('total', 'estado')
-                ->toArray(),
-            'mensual' => $this->obtenerEjecucionesMensuales()
-        ];
+        $resultado = $ejecuciones->map(function ($e) {
+            $fueExitoso = match ($e->fue_exitoso) {
+                'si' => 'Exitoso',
+                'no' => 'Fallido',
+                'parcial' => 'Parcial',
+                default => null
+            };
+
+            $rendimiento = ($e->cantidad_sembrada && $e->cantidad_cosechada && $e->cantidad_sembrada > 0)
+                ? ($e->cantidad_cosechada / $e->cantidad_sembrada) * 100
+                : null;
+
+            return [
+                'agricultor' => $e->detalle->plan->parcela->agricultor->name ?? '—',
+                'parcela' => $e->detalle->plan->parcela->nombre ?? '—',
+                'cultivo_plan' => $e->detalle->cultivo->nombre ?? '—',
+                'cultivo_real' => $e->cultivoReal->nombre ?? '—',
+                'variedad' => $e->cultivoReal->variedad ?? null,
+                'fecha_siembra' => optional($e->fecha_siembra)->format('d/m/Y') ?? '—',
+                'fecha_cosecha' => optional($e->fecha_cosecha)->format('d/m/Y') ?? '—',
+                'cantidad_sembrada' => $e->cantidad_sembrada,
+                'cantidad_cosechada' => $e->cantidad_cosechada,
+                'unidad_medida' => $e->unidad_medida ?? '—',
+                'area_cultivada' => $e->area_cultivada,
+                'rendimiento_produccion' => $e->rendimiento_produccion,
+                'rendimiento_parcela' => $e->rendimiento_parcela,
+                'fue_exitoso' => $fueExitoso,
+                'estado' => $e->estado ?? '—',
+                'observaciones' => $e->observaciones ?? '—',
+                'rendimiento_calculado' => $rendimiento
+            ];
+        });
+
+        return response()->json($resultado);
     }
 }

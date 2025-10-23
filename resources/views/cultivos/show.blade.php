@@ -80,11 +80,3 @@
     </div>
 </div>
 @stop
-
-@section('css')
-{{-- Aquí puedes agregar estilos específicos si deseas --}}
-@stop
-
-@section('js')
-{{-- JS adicional si lo necesitas --}}
-@stop

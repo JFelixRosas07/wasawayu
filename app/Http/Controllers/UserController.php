@@ -14,18 +14,14 @@ class UserController extends Controller
 {
     public function __construct()
     {
-        // Middleware que garantiza que solo los usuarios autenticados
-        // con rol Administrador accedan a este controlador.
-        $this->middleware(['auth', 'role:Administrador']);
+        $this->middleware(['auth']);
+        $this->middleware(['role:Administrador'])->except(['perfil', 'actualizarPerfil']);
     }
 
+    // crud general (solo administrador)
     public function index()
     {
-        // Obtiene todos los usuarios junto con sus roles,
-        // ordenados alfabéticamente y paginados de 10 en 10.
         $users = User::with('roles')->orderBy('name')->paginate(10);
-
-        // Retorna la vista principal de usuarios, enviando la colección obtenida.
         return view('users.index', compact('users'));
     }
 
@@ -37,7 +33,6 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
-        // Validación de los campos ingresados en el formulario
         $data = $request->validate([
             'name' => 'required|string|regex:/^[\pL\s]+$/u|max:255',
             'email' => 'required|email:rfc,dns|unique:users,email',
@@ -47,23 +42,20 @@ class UserController extends Controller
             'foto' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        // Procesamiento de la foto y guardado en carpeta pública
+        // subir foto
         $fotoPath = null;
         if ($request->hasFile('foto')) {
             $file = $request->file('foto');
             $filename = time() . '_' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $file->getClientOriginalExtension();
 
-            // Crear directorio si no existe
             $uploadPath = public_path('uploads/usuarios');
-            if (!file_exists($uploadPath)) {
+            if (!file_exists($uploadPath))
                 mkdir($uploadPath, 0755, true);
-            }
 
             $file->move($uploadPath, $filename);
             $fotoPath = 'uploads/usuarios/' . $filename;
         }
 
-        // Creación del usuario con hash en la contraseña
         $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
@@ -72,10 +64,9 @@ class UserController extends Controller
             'foto' => $fotoPath,
         ]);
 
-        // Asignación del rol mediante Spatie
         $user->assignRole($data['role']);
 
-        return redirect()->route('users.index')->with('success', 'Usuario creado correctamente.');
+        return redirect()->route('users.index')->with('success', 'usuario creado correctamente.');
     }
 
     public function edit(User $user)
@@ -93,42 +84,32 @@ class UserController extends Controller
             'role' => 'required|string|exists:roles,name',
             'estado' => 'nullable|boolean',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ], [
-            'password.min' => 'La contraseña debe tener al menos 6 caracteres.',
-            'password.max' => 'La contraseña no debe tener más de 20 caracteres.',
         ]);
 
-        // Seguridad: impedir que el admin se quite su propio rol
+        // evitar que un administrador se quite su propio rol
         if ($user->id === auth()->id() && $data['role'] !== 'Administrador') {
-            return back()->withErrors(['role' => 'No puedes quitarte el rol Administrador a ti mismo.']);
+            return back()->withErrors(['role' => 'no puedes quitarte el rol administrador a ti mismo.']);
         }
 
-        // Actualizar campos básicos
-        $user->name = $data['name'];
-        $user->email = $data['email'];
-        $user->estado = $request->has('estado');
+        $user->fill([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'estado' => $request->has('estado'),
+        ]);
 
-        // Actualizar contraseña si se proporciona
         if (!empty($data['password'])) {
             $user->password = Hash::make($data['password']);
         }
 
-        // Manejar actualización de foto
         if ($request->hasFile('foto')) {
-            // Eliminar foto anterior si existe
-            if ($user->foto && file_exists(public_path($user->foto))) {
+            // borrar foto anterior si existe
+            if ($user->foto && file_exists(public_path($user->foto)))
                 unlink(public_path($user->foto));
-            }
-
-            // Subir nueva foto
             $file = $request->file('foto');
             $filename = time() . '_' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $file->getClientOriginalExtension();
-
             $uploadPath = public_path('uploads/usuarios');
-            if (!file_exists($uploadPath)) {
+            if (!file_exists($uploadPath))
                 mkdir($uploadPath, 0755, true);
-            }
-
             $file->move($uploadPath, $filename);
             $user->foto = 'uploads/usuarios/' . $filename;
         }
@@ -136,41 +117,81 @@ class UserController extends Controller
         $user->save();
         $user->syncRoles([$data['role']]);
 
-        return redirect()->route('users.index')->with('success', 'Usuario actualizado correctamente.');
+        return redirect()->route('users.index')->with('success', 'usuario actualizado correctamente.');
     }
 
+    // desactivar usuario
     public function destroy(User $user)
     {
-        // Protección: no permitir desactivar al administrador principal
         if ($user->id === 1) {
-            return back()->withErrors(['user' => 'No puedes desactivar al administrador principal del sistema.']);
+            return back()->withErrors(['user' => 'no puedes desactivar al administrador principal.']);
         }
 
         $user->estado = false;
         $user->save();
 
-        return redirect()->route('users.index')->with('success', 'Usuario desactivado.');
+        return redirect()->route('users.index')->with('success', 'usuario desactivado.');
     }
 
+    // alternar estado del usuario
     public function toggle(User $user)
     {
-        // Protección: no permitir que un usuario se desactive a sí mismo
-        if ($user->id === auth()->id()) {
-            return back()->withErrors(['user' => 'No puedes cambiar el estado de tu propia cuenta.']);
-        }
-
-        if ($user->id === 1) {
-            return back()->withErrors(['user' => 'No puedes desactivar al administrador principal del sistema.']);
+        if ($user->id === auth()->id() || $user->id === 1) {
+            return back()->withErrors(['user' => 'accion no permitida.']);
         }
 
         $user->estado = !$user->estado;
         $user->save();
 
-        return back()->with('success', 'Estado del usuario actualizado.');
+        return back()->with('success', 'estado del usuario actualizado.');
     }
 
     public function show(User $user)
     {
         return view('users.show', compact('user'));
+    }
+
+    // perfil personal (tecnico / agricultor)
+    public function perfil()
+    {
+        $usuario = auth()->user();
+        return view('usuarios.perfil', compact('usuario'));
+    }
+
+    public function actualizarPerfil(Request $request)
+    {
+        $user = auth()->user();
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($user->id)],
+            'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'password' => 'nullable|string|min:6|confirmed',
+        ]);
+
+        $user->name = $validated['name'];
+        $user->email = $validated['email'];
+
+        if (!empty($validated['password'])) {
+            $user->password = Hash::make($validated['password']);
+        }
+
+        if ($request->hasFile('foto')) {
+            // borrar foto anterior si existe
+            if ($user->foto && file_exists(public_path($user->foto))) {
+                unlink(public_path($user->foto));
+            }
+            $file = $request->file('foto');
+            $filename = time() . '_' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $file->getClientOriginalExtension();
+            $uploadPath = public_path('uploads/usuarios');
+            if (!file_exists($uploadPath))
+                mkdir($uploadPath, 0755, true);
+            $file->move($uploadPath, $filename);
+            $user->foto = 'uploads/usuarios/' . $filename;
+        }
+
+        $user->save();
+
+        return back()->with('success', 'perfil actualizado correctamente.');
     }
 }

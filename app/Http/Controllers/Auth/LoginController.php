@@ -28,7 +28,7 @@ class LoginController extends Controller
     {
         $rules = [
             $this->username() => 'required|string|email',
-            'password'        => 'required|string',
+            'password' => 'required|string',
         ];
 
         if ($this->limiteDeIntentosAlcanzado($request)) {
@@ -37,7 +37,7 @@ class LoginController extends Controller
 
         $messages = [
             'captcha.required' => __('auth.captcha'),
-            'captcha.captcha'  => __('auth.captcha'),
+            'captcha.captcha' => __('auth.captcha'),
         ];
 
         $request->validate($rules, $messages);
@@ -69,14 +69,14 @@ class LoginController extends Controller
     {
         $user = User::where($this->username(), $request->{$this->username()})->first();
 
-        if ($user && ! $user->estado) {
+        if ($user && !$user->estado) {
             throw ValidationException::withMessages([
-                $this->username() => [trans('auth.inactive')],
+                'error' => [trans('auth.inactive')],
             ]);
         }
 
         throw ValidationException::withMessages([
-            $this->username() => [trans('auth.failed')],
+            'error' => [trans('auth.failed')],
         ]);
     }
 }

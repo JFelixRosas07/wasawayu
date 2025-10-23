@@ -9,9 +9,12 @@
 @section('content')
 <div class="card">
     <div class="card-header">
-        <a href="{{ route('cultivos.create') }}" class="btn btn-primary">
-            <i class="fas fa-plus"></i> Nuevo Cultivo
-        </a>
+        {{-- Solo administradores y técnicos agrónomos pueden crear --}}
+        @if(auth()->user()->hasAnyRole(['Administrador', 'TecnicoAgronomo']))
+            <a href="{{ route('cultivos.create') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Nuevo Cultivo
+            </a>
+        @endif
     </div>
     <div class="card-body">
 
@@ -24,9 +27,19 @@
                 </button>
             </div>
         @endif
+
         @if($errors->any())
             <div class="alert alert-danger">
                 <ul class="mb-0">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul>
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle"></i> {{ session('error') }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
         @endif
 
@@ -67,19 +80,24 @@
                             </td>
                             <td class="text-center">
                                 <div class="btn-group" role="group">
+                                    {{-- Todos pueden ver --}}
                                     <a href="{{ route('cultivos.show', $cultivo) }}" class="btn btn-sm btn-primary" title="Ver Detalle">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    <a href="{{ route('cultivos.edit', $cultivo) }}" class="btn btn-sm btn-warning" title="Editar">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <form action="{{ route('cultivos.destroy', $cultivo) }}" method="POST" class="form-delete d-inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
+
+                                    {{-- Solo administradores y técnicos agrónomos pueden editar o eliminar --}}
+                                    @if(auth()->user()->hasAnyRole(['Administrador', 'TecnicoAgronomo']))
+                                        <a href="{{ route('cultivos.edit', $cultivo) }}" class="btn btn-sm btn-warning" title="Editar">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <form action="{{ route('cultivos.destroy', $cultivo) }}" method="POST" class="form-delete d-inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
@@ -142,11 +160,11 @@ $(document).ready(function() {
             { extend: 'print', text: '<i class="fas fa-print"></i> Imprimir', className: 'btn btn-secondary btn-sm', exportOptions: { columns: [0,1,2] } }
         ],
         columnDefs: [
-            { targets: [4], orderable: false, searchable: false } // Acciones no ordenables
+            { targets: [4], orderable: false, searchable: false } // Columna de acciones no ordenable ni buscable
         ]
     });
 
-    // SweetAlert2 para confirmación de eliminación
+    // Confirmación de eliminación con SweetAlert2
     $('#tabla-cultivos').on('submit', '.form-delete', function(e) {
         e.preventDefault();
         var form = this;
@@ -165,5 +183,4 @@ $(document).ready(function() {
     });
 });
 </script>
-
 @stop

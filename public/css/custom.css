@@ -1,4 +1,4 @@
-/* ----------------- FUENTES Y VARIABLES OPTIMIZADAS ----------------- */
+/* Fuentes y variables optimizadas */
 @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Nunito:wght@400;500;600;700&display=swap');
 
 :root {
@@ -15,7 +15,7 @@
   --shadow-medium:   0 8px 30px rgba(27, 67, 50, 0.12);
 }
 
-/* ----------------- BASE RESPONSIVE ----------------- */
+/* Base responsive */
 body {
   font-family: 'Nunito', sans-serif;
   background: linear-gradient(135deg, #f5f7f5 0%, #e8f5e8 100%);
@@ -24,13 +24,13 @@ body {
   overflow-x: hidden;
 }
 
-/* ----------------- SIDEBAR RESPONSIVE ----------------- */
+/* Sidebar responsive */
 .main-sidebar {
   background: linear-gradient(180deg, var(--andino-oscuro) 0%, #0f241a 100%) !important;
   transition: all var(--transition);
 }
 
-/* ============ LOGO - CONFIGURACIÓN OPTIMIZADA ============ */
+/* Logo - Configuración optimizada */
 .brand-link {
   display: flex !important;
   justify-content: center !important;
@@ -60,7 +60,7 @@ body {
   display: none !important;
 }
 
-/* Sidebar colapsado (mini) - LOGO AJUSTADO */
+/* Sidebar colapsado (mini) - Logo ajustado */
 .sidebar-mini.sidebar-collapse .brand-link {
   height: 70px !important;
   padding: 0 !important;
@@ -78,8 +78,8 @@ body {
   margin: auto !important;
   object-fit: contain !important;
 }
-/* ============ FIN LOGO ============ */
 
+/* Fin logo */
 .sidebar .nav-sidebar .nav-link {
   color: rgba(255, 255, 255, 0.9);
   padding: 0.75rem 1.25rem;
@@ -98,7 +98,7 @@ body {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-/* ----------------- NAVBAR RESPONSIVE ----------------- */
+/* Navbar responsive */
 .main-header {
   background: linear-gradient(135deg, var(--andino-oscuro), var(--andino-hoja)) !important;
   color: #fff !important;
@@ -122,7 +122,7 @@ body {
   background: rgba(255, 255, 255, 0.1);
 }
 
-/* ----------------- CONTENT WRAPPER RESPONSIVE - CORRECCIÓN ----------------- */
+/* Content wrapper responsive - Corrección */
 .content-wrapper {
   position: relative;
   z-index: 1;
@@ -144,7 +144,7 @@ body {
   z-index: -1;
 }
 
-/* ----------------- CARDS - ESTILOS BASE QUE SE MANTIENEN ----------------- */
+/* Cards - Estilos base */
 .card {
   background: rgba(255, 255, 255, 0.25) !important;
   backdrop-filter: blur(12px) saturate(180%);
@@ -187,12 +187,10 @@ body {
   padding: 1.25rem !important;
 }
 
-/* ----------------- MEDIA QUERIES CORREGIDAS ----------------- */
-
-/* Tablets pequeñas y móviles grandes - MANTENER FONDO ORIGINAL */
+/* Media queries corregidas */
 @media (max-width: 768px) {
   .content-wrapper {
-    /* SOLO CAMBIAR background-attachment, mantener la imagen */
+    /* Cambiar solo background-attachment */
     background: url('/images/fondo_campo.png') no-repeat center center scroll;
     background-size: cover;
     background-position: center 70%;
@@ -203,7 +201,7 @@ body {
     background: rgba(255, 255, 255, 0.5);
   }
   
-  /* LOGO RESPONSIVE - TABLETS */
+  /* Logo responsive - Tablets */
   .brand-link {
     height: 180px !important;
   }
@@ -214,7 +212,7 @@ body {
   }
   
   .card {
-    /* MANTENER ESTILOS ORIGINALES, solo ajustar márgenes */
+    /* Ajustar márgenes */
     margin-bottom: 1rem !important;
   }
   
@@ -227,7 +225,7 @@ body {
   }
 }
 
-/* Móviles - MANTENER FONDO ORIGINAL */
+/* Móviles */
 @media (max-width: 576px) {
   body {
     font-size: 14px;
@@ -239,7 +237,7 @@ body {
     background-position: center 70%;
   }
   
-  /* LOGO RESPONSIVE - MÓVILES */
+  /* Logo responsive - Móviles */
   .brand-link {
     height: 160px !important;
   }
@@ -272,7 +270,7 @@ body {
   }
 }
 
-/* Móviles muy pequeños - MANTENER FONDO ORIGINAL */
+/* Móviles muy pequeños */
 @media (max-width: 375px) {
   .content-wrapper {
     background: url('/images/fondo_campo.png') no-repeat center center scroll;
@@ -285,7 +283,7 @@ body {
     background: rgba(255, 255, 255, 0.4);
   }
   
-  /* LOGO RESPONSIVE - MÓVILES PEQUEÑOS */
+  /* Logo responsive - Móviles pequeños */
   .brand-link {
     height: 140px !important;
   }
@@ -310,7 +308,7 @@ body {
   }
 }
 
-/* ----------------- GARANTIZAR CARDS EN SIDEBAR COLAPSADO ----------------- */
+/* Garantizar cards en sidebar colapsado */
 .sidebar-mini.sidebar-collapse .content-wrapper .card,
 .sidebar-mini.sidebar-collapse .card {
   background: rgba(255, 255, 255, 0.25) !important;

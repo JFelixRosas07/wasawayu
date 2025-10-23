@@ -1,11 +1,11 @@
-/* ----------------- FONDO ----------------- */
+/* Fondo */
 body.login-page {
     background: url('/images/fondo_andino.jpg') no-repeat center center fixed;
     background-size: cover;
     font-family: 'Nunito', sans-serif;
 }
 
-/* ----------------- LOGO ----------------- */
+/* Logo */
 .logo-wasawayu {
     width: 200px;
     height: auto;
@@ -14,7 +14,7 @@ body.login-page {
     object-fit: cover;
 }
 
-/* ----------------- CARD LOGIN ----------------- */
+/* Card login */
 .login-box .card,
 .login-card-body {
     background: rgba(255, 255, 255, 0.85) !important;
@@ -31,7 +31,7 @@ body.login-page {
     box-shadow: 0 12px 36px rgba(27, 67, 50, 0.2);
 }
 
-/* ----------------- INPUTS ----------------- */
+/* Inputs */
 .custom-input {
     border-radius: 10px 0 0 10px !important;
     border: 1px solid #ccc;
@@ -43,7 +43,7 @@ body.login-page {
     box-shadow: 0 0 8px rgba(45, 106, 79, 0.3);
 }
 
-/* ----------------- BOTÓN LOGIN ----------------- */
+/* Botón login */
 .btn-success {
     background-color: var(--andino-oscuro) !important;
     border-color: var(--andino-oscuro) !important;

@@ -13,14 +13,22 @@ class EjecucionRotacion extends Model
 
     protected $fillable = [
         'detalle_id',
+        'cultivo_real_id',
         'fecha_siembra',
         'fecha_cosecha',
+        'cantidad_sembrada',
+        'cantidad_cosechada',
+        'unidad_medida',
+        'area_cultivada',
+        'fue_exitoso',
+        'rendimiento_produccion',
+        'rendimiento_parcela',
         'observaciones',
         'estado',
         'creado_por',
     ];
 
-    // ✅ AGREGAR ESTOS CASTS
+    // agrega esto
     protected $casts = [
         'fecha_siembra' => 'date',
         'fecha_cosecha' => 'date',
@@ -28,14 +36,14 @@ class EjecucionRotacion extends Model
         'updated_at' => 'datetime',
     ];
 
-    // Relaciones (mantener las existentes)
+    // relaciones
     public function detalle()
     {
         return $this->belongsTo(DetalleRotacion::class, 'detalle_id');
     }
 
-    public function creador()
+    public function cultivoReal()
     {
-        return $this->belongsTo(User::class, 'creado_por');
+        return $this->belongsTo(Cultivo::class, 'cultivo_real_id');
     }
 }

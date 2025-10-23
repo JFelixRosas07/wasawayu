@@ -3,7 +3,12 @@
 @section('title', 'Editar Cultivo')
 
 @section('content_header')
-    <h1><i class="fas fa-edit"></i> Editar Cultivo</h1>
+    <div class="d-flex justify-content-between align-items-center">
+        <h1><i class="fas fa-edit"></i> Editar Cultivo</h1>
+        <a href="{{ route('cultivos.index') }}" class="btn btn-secondary btn-sm">
+            <i class="fas fa-arrow-left"></i> Volver al Listado
+        </a>
+    </div>
 @stop
 
 @section('content')
@@ -22,7 +27,7 @@
             <div class="form-row">
                 <div class="form-group col-md-6">
                     <label><i class="fas fa-leaf"></i> Nombre del Cultivo</label>
-                    <input type="text" name="nombre" class="form-control" value="{{ $cultivo->nombre }}" required>
+                    <input type="text" name="nombre" class="form-control" value="{{ old('nombre', $cultivo->nombre) }}" required>
                 </div>
 
                 <div class="form-group col-md-6">
@@ -51,33 +56,33 @@
                 </div>
                 <div class="form-group col-md-4">
                     <label><i class="fas fa-calendar-alt"></i> Días de Cultivo</label>
-                    <input type="number" name="diasCultivo" class="form-control" value="{{ $cultivo->diasCultivo }}" required>
+                    <input type="number" name="diasCultivo" class="form-control" value="{{ old('diasCultivo', $cultivo->diasCultivo) }}" required>
                 </div>
                 <div class="form-group col-md-4">
                     <label><i class="fas fa-leaf"></i> Variedad</label>
-                    <input type="text" name="variedad" class="form-control" value="{{ $cultivo->variedad }}">
+                    <input type="text" name="variedad" class="form-control" value="{{ old('variedad', $cultivo->variedad) }}">
                 </div>
             </div>
 
             <div class="form-row">
                 <div class="form-group col-md-6">
                     <label><i class="fas fa-seedling"></i> Época de Siembra</label>
-                    <input type="text" name="epocaSiembra" class="form-control" value="{{ $cultivo->epocaSiembra }}" required>
+                    <input type="text" name="epocaSiembra" class="form-control" value="{{ old('epocaSiembra', $cultivo->epocaSiembra) }}" required>
                 </div>
                 <div class="form-group col-md-6">
                     <label><i class="fas fa-tractor"></i> Época de Cosecha</label>
-                    <input type="text" name="epocaCosecha" class="form-control" value="{{ $cultivo->epocaCosecha }}" required>
+                    <input type="text" name="epocaCosecha" class="form-control" value="{{ old('epocaCosecha', $cultivo->epocaCosecha) }}" required>
                 </div>
             </div>
 
             <div class="form-group">
                 <label><i class="fas fa-align-left"></i> Descripción</label>
-                <textarea name="descripcion" class="form-control" rows="3">{{ $cultivo->descripcion }}</textarea>
+                <textarea name="descripcion" class="form-control" rows="3">{{ old('descripcion', $cultivo->descripcion) }}</textarea>
             </div>
 
             <div class="form-group">
                 <label><i class="fas fa-lightbulb"></i> Recomendaciones</label>
-                <textarea name="recomendaciones" class="form-control" rows="3">{{ $cultivo->recomendaciones }}</textarea>
+                <textarea name="recomendaciones" class="form-control" rows="3">{{ old('recomendaciones', $cultivo->recomendaciones) }}</textarea>
             </div>
 
             <div class="form-group">
@@ -89,9 +94,26 @@
                 <small class="form-text text-muted">Si no selecciona una nueva, se mantendrá la actual.</small>
             </div>
 
-            <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Actualizar</button>
-            <a href="{{ route('cultivos.index') }}" class="btn btn-secondary">Cancelar</a>
+            <div class="form-group mt-4">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-save"></i> Actualizar Cultivo
+                </button>
+                <a href="{{ route('cultivos.index') }}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancelar
+                </a>
+                <a href="{{ route('cultivos.show', $cultivo) }}" class="btn btn-info">
+                    <i class="fas fa-eye"></i> Ver Detalles
+                </a>
+            </div>
         </form>
     </div>
 </div>
+@stop
+
+@section('css')
+<style>
+    .btn {
+        margin-right: 5px;
+    }
+</style>
 @stop

@@ -180,8 +180,7 @@
             <span class="info-box-icon"><i class="fas fa-wind"></i></span>
             <div class="info-box-content">
                 <span class="info-box-text">Velocidad Viento</span>
-                <span class="info-box-number">{{ $datosClima ? round($datosClima['wind']['speed'] * 3.6) : 'N/A' }}
-                    km/h</span>
+                <span class="info-box-number">{{ $datosClima ? round($datosClima['wind']['speed'] * 3.6) : 'N/A' }} km/h</span>
             </div>
         </div>
     </div>
@@ -190,8 +189,7 @@
             <span class="info-box-icon"><i class="fas fa-eye"></i></span>
             <div class="info-box-content">
                 <span class="info-box-text">Visibilidad</span>
-                <span class="info-box-number">{{ $datosClima ? round($datosClima['visibility'] / 1000, 1) : 'N/A' }}
-                    km</span>
+                <span class="info-box-number">{{ $datosClima ? round($datosClima['visibility'] / 1000, 1) : 'N/A' }} km</span>
             </div>
         </div>
     </div>
@@ -201,6 +199,7 @@
 @section('css')
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 <style>
+    /* Estilos de tarjetas e imágenes */
     .info-box {
         border-radius: 10px;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -219,9 +218,9 @@
     // Mapa climático con capa satelital
     var mapa = L.map('mapa-clima').setView([-17.582086, -65.705282], 13);
 
-    // Capa Satelital (Esri World Imagery)
+    // Capa satelital (Esri World Imagery)
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+        attribution: 'Tiles &copy; Esri — Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
         maxZoom: 18
     }).addTo(mapa);
 
@@ -231,12 +230,12 @@
         .bindPopup('Wasawayu Central<br>Temperatura: {{ $datosClima ? round($datosClima["main"]["temp"]) : "N/A" }}°C')
         .openPopup();
 
-    // Cambiar ubicación del clima
+    // Cambio de ubicación del clima
     document.getElementById('selector-ubicacion').addEventListener('change', function () {
         const [lat, lon] = this.value.split(',');
         const nombre = this.options[this.selectedIndex].dataset.nombre;
 
-        // Aquí puedes hacer una llamada AJAX para actualizar el clima
+        // Llamada AJAX para actualizar el clima
         fetch('{{ route("clima.ubicacion") }}', {
             method: 'POST',
             headers: {
@@ -245,14 +244,15 @@
             },
             body: JSON.stringify({ lat: lat, lon: lon })
         })
-            .then(response => response.json())
-            .then(data => {
-                if (data) {
-                    actualizarWidgetClima(data, nombre);
-                }
-            });
+        .then(response => response.json())
+        .then(data => {
+            if (data) {
+                actualizarWidgetClima(data, nombre);
+            }
+        });
     });
 
+    // Actualización del widget de clima
     function actualizarWidgetClima(datos, nombre) {
         const widget = document.getElementById('clima-widget');
         widget.innerHTML = `

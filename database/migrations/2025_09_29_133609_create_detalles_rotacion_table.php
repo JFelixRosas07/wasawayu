@@ -14,7 +14,7 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('plan_id')->constrained('planes_rotacion')->onDelete('cascade');
             $table->integer('anio'); // 1,2,3,4...
-            $table->foreignId('cultivo_id')->nullable()->constrained('cultivos')->onDelete('set null');
+            $table->foreignId('cultivo_id')->nullable()->constrained('cultivos')->onDelete('set null');// A nivel lógico, el sistema bloqueará la eliminación desde el controlador
             $table->boolean('es_descanso')->default(false);
             $table->date('fecha_inicio')->nullable();
             $table->date('fecha_fin')->nullable();

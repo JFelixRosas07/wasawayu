@@ -13,9 +13,7 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable, HasRoles;
 
-    /**
-     * Atributos que se pueden asignar en masa
-     */
+    // atributos que se pueden asignar en masa
     protected $fillable = [
         'name',
         'email',
@@ -24,43 +22,37 @@ class User extends Authenticatable
         'foto',
     ];
 
-    /**
-     * Atributos ocultos en serialización
-     */
+    // atributos ocultos en serializacion
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * Conversión automática de tipos
-     */
+    // conversion automatica de tipos
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
         'estado' => 'boolean',
     ];
 
-    /*--------------------------------------------
-    | RELACIONES
-    ---------------------------------------------*/
+    // relaciones
 
-    // Un usuario (agricultor) puede tener varias parcelas
+    // un usuario (agricultor) puede tener varias parcelas
     public function parcelas()
     {
         return $this->hasMany(Parcela::class, 'agricultor_id');
     }
 
-    // Un usuario puede tener varios planes de rotación a través de sus parcelas
+    // un usuario puede tener varios planes de rotacion a traves de sus parcelas
     public function planesRotacion()
     {
         return $this->hasManyThrough(
-            PlanRotacion::class,   // Modelo final
-            Parcela::class,        // Modelo intermedio
-            'agricultor_id',       // Clave foránea en la tabla parcelas
-            'parcela_id',          // Clave foránea en la tabla planes_rotacion
-            'id',                  // Clave primaria en users
-            'id'                   // Clave primaria en parcelas
+            PlanRotacion::class,   // modelo final
+            Parcela::class,        // modelo intermedio
+            'agricultor_id',       // clave foranea en la tabla parcelas
+            'parcela_id',          // clave foranea en la tabla planes_rotacion
+            'id',                  // clave primaria en users
+            'id'                   // clave primaria en parcelas
         );
     }
 }
