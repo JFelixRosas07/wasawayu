@@ -159,39 +159,44 @@ class UserController extends Controller
     }
 
     public function actualizarPerfil(Request $request)
-    {
-        $user = auth()->user();
+{
+    /** @var \App\Models\User $user */
+    $user = auth()->user();
 
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($user->id)],
-            'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            'password' => 'nullable|string|min:6|confirmed',
-        ]);
+    $validated = $request->validate([
+        'name' => 'required|string|regex:/^[\pL\s]+$/u|max:255',
+        'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($user->id)],
+        'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+        'password' => 'nullable|string|min:6|confirmed',
+    ], [
+        'name.regex' => 'El nombre solo puede contener letras y espacios.',
+    ]);
 
-        $user->name = $validated['name'];
-        $user->email = $validated['email'];
+    $user->name = $validated['name'];
+    $user->email = $validated['email'];
 
-        if (!empty($validated['password'])) {
-            $user->password = Hash::make($validated['password']);
-        }
-
-        if ($request->hasFile('foto')) {
-            // borrar foto anterior si existe
-            if ($user->foto && file_exists(public_path($user->foto))) {
-                unlink(public_path($user->foto));
-            }
-            $file = $request->file('foto');
-            $filename = time() . '_' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $file->getClientOriginalExtension();
-            $uploadPath = public_path('uploads/usuarios');
-            if (!file_exists($uploadPath))
-                mkdir($uploadPath, 0755, true);
-            $file->move($uploadPath, $filename);
-            $user->foto = 'uploads/usuarios/' . $filename;
-        }
-
-        $user->save();
-
-        return back()->with('success', 'perfil actualizado correctamente.');
+    if (!empty($validated['password'])) {
+        $user->password = Hash::make($validated['password']);
     }
+
+    if ($request->hasFile('foto')) {
+        if ($user->foto && file_exists(public_path($user->foto))) {
+            unlink(public_path($user->foto));
+        }
+
+        $file = $request->file('foto');
+        $filename = time() . '_' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $file->getClientOriginalExtension();
+        $uploadPath = public_path('uploads/usuarios');
+        if (!file_exists($uploadPath))
+            mkdir($uploadPath, 0755, true);
+        $file->move($uploadPath, $filename);
+        $user->foto = 'uploads/usuarios/' . $filename;
+    }
+
+    // 🔹 Guardar finalmente los cambios
+    $user->save();
+
+    return back()->with('success', 'Perfil actualizado correctamente.');
+}
+
 }

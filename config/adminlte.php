@@ -328,7 +328,7 @@ return [
             'route' => 'cultivos.index',
             'icon' => 'fas fa-seedling',
         ],
-        // 🔁 NUEVO MENÚ ÚNICO PARA ROTACIONES
+        
         [
             'text' => 'Rotaciones',
             'route' => 'admin.rotaciones.dashboard',

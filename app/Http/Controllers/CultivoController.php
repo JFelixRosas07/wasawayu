@@ -17,12 +17,11 @@ class CultivoController extends Controller
         return view('cultivos.index', compact('cultivos'));
     }
 
-    // mostrar formulario de creacion
+    // mostrar formulario de creación
     public function create()
     {
         $user = Auth::user();
 
-        // agricultor no puede crear
         if ($user->hasRole('Agricultor')) {
             abort(403, 'no tienes permiso para crear cultivos.');
         }
@@ -38,25 +37,48 @@ class CultivoController extends Controller
     {
         $user = Auth::user();
 
-        // agricultor no puede guardar
         if ($user->hasRole('Agricultor')) {
-            abort(403, 'no tienes permiso para realizar esta accion.');
+            abort(403, 'no tienes permiso para realizar esta acción.');
         }
 
+        $meses = [
+            'enero',
+            'febrero',
+            'marzo',
+            'abril',
+            'mayo',
+            'junio',
+            'julio',
+            'agosto',
+            'septiembre',
+            'octubre',
+            'noviembre',
+            'diciembre'
+        ];
+
         $request->validate([
-            'nombre' => 'required|string|max:255',
+            'nombre' => ['required', 'regex:/^[\pL\s]+$/u', 'max:255', 'unique:cultivos,nombre'],
             'categoria' => 'required|string|max:255',
             'cargaSuelo' => 'required|string',
-            'diasCultivo' => 'required|integer|min:1',
-            'epocaSiembra' => 'required|string|max:255',
-            'epocaCosecha' => 'required|string|max:255',
+            'diasCultivo' => 'required|integer|min:1|max:365',
+            'siembra_inicio' => 'required|string|in:' . implode(',', $meses),
+            'siembra_fin' => 'required|string|in:' . implode(',', $meses),
+            'cosecha_inicio' => 'required|string|in:' . implode(',', $meses),
+            'cosecha_fin' => 'required|string|in:' . implode(',', $meses),
             'descripcion' => 'nullable|string',
-            'variedad' => 'nullable|string|max:255',
+            'variedad' => ['nullable', 'regex:/^[\pL\s]+$/u', 'max:255'],
             'recomendaciones' => 'nullable|string',
             'imagen' => 'required|image|mimes:jpg,jpeg,png|max:2048',
+        ], [
+            'nombre.unique' => 'Ya existe un cultivo con este nombre.',
+            'nombre.regex' => 'El nombre del cultivo solo debe contener letras y espacios.',
+            'variedad.regex' => 'La variedad solo debe contener letras y espacios.',
+            'diasCultivo.max' => 'Los días de cultivo no pueden superar los 365 días.',
         ]);
 
         $data = $request->all();
+        $data['epocaSiembra'] = "{$request->siembra_inicio} - {$request->siembra_fin}";
+        $data['epocaCosecha'] = "{$request->cosecha_inicio} - {$request->cosecha_fin}";
 
         if ($request->hasFile('imagen')) {
             $file = $request->file('imagen');
@@ -68,7 +90,7 @@ class CultivoController extends Controller
         Cultivo::create($data);
 
         return redirect()->route('cultivos.index')
-            ->with('success', 'cultivo registrado correctamente.');
+            ->with('success', 'Cultivo registrado correctamente.');
     }
 
     // mostrar un cultivo
@@ -82,7 +104,6 @@ class CultivoController extends Controller
     {
         $user = Auth::user();
 
-        // agricultor no puede editar
         if ($user->hasRole('Agricultor')) {
             abort(403, 'no tienes permiso para editar cultivos.');
         }
@@ -98,28 +119,50 @@ class CultivoController extends Controller
     {
         $user = Auth::user();
 
-        // agricultor no puede actualizar
         if ($user->hasRole('Agricultor')) {
             abort(403, 'no tienes permiso para actualizar cultivos.');
         }
 
+        $meses = [
+            'enero',
+            'febrero',
+            'marzo',
+            'abril',
+            'mayo',
+            'junio',
+            'julio',
+            'agosto',
+            'septiembre',
+            'octubre',
+            'noviembre',
+            'diciembre'
+        ];
+
         $request->validate([
-            'nombre' => 'required|string|max:255',
+            'nombre' => ['required', 'regex:/^[\pL\s]+$/u', 'max:255', 'unique:cultivos,nombre,' . $cultivo->id],
             'categoria' => 'required|string|max:255',
             'cargaSuelo' => 'required|string',
-            'diasCultivo' => 'required|integer|min:1',
-            'epocaSiembra' => 'required|string|max:255',
-            'epocaCosecha' => 'required|string|max:255',
+            'diasCultivo' => 'required|integer|min:1|max:365',
+            'siembra_inicio' => 'required|string|in:' . implode(',', $meses),
+            'siembra_fin' => 'required|string|in:' . implode(',', $meses),
+            'cosecha_inicio' => 'required|string|in:' . implode(',', $meses),
+            'cosecha_fin' => 'required|string|in:' . implode(',', $meses),
             'descripcion' => 'nullable|string',
-            'variedad' => 'nullable|string|max:255',
+            'variedad' => ['nullable', 'regex:/^[\pL\s]+$/u', 'max:255'],
             'recomendaciones' => 'nullable|string',
             'imagen' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+        ], [
+            'nombre.unique' => 'Ya existe un cultivo con este nombre.',
+            'nombre.regex' => 'El nombre del cultivo solo debe contener letras y espacios.',
+            'variedad.regex' => 'La variedad solo debe contener letras y espacios.',
+            'diasCultivo.max' => 'Los días de cultivo no pueden superar los 365 días.',
         ]);
 
         $data = $request->all();
+        $data['epocaSiembra'] = "{$request->siembra_inicio} - {$request->siembra_fin}";
+        $data['epocaCosecha'] = "{$request->cosecha_inicio} - {$request->cosecha_fin}";
 
         if ($request->hasFile('imagen')) {
-            // borrar imagen anterior si existe
             if ($cultivo->imagen && file_exists(public_path($cultivo->imagen))) {
                 unlink(public_path($cultivo->imagen));
             }
@@ -128,12 +171,14 @@ class CultivoController extends Controller
             $nombre = time() . '_' . $file->getClientOriginalName();
             $file->move(public_path('images/cultivos'), $nombre);
             $data['imagen'] = 'images/cultivos/' . $nombre;
+        } else {
+            $data['imagen'] = $cultivo->imagen;
         }
 
         $cultivo->update($data);
 
         return redirect()->route('cultivos.index')
-            ->with('success', 'cultivo actualizado correctamente.');
+            ->with('success', 'Cultivo actualizado correctamente.');
     }
 
     // eliminar cultivo
@@ -141,25 +186,21 @@ class CultivoController extends Controller
     {
         $user = Auth::user();
 
-        // solo administrador puede eliminar
         if (!$user->hasRole('Administrador')) {
             abort(403, 'no tienes permiso para eliminar cultivos.');
         }
 
-        // verificar si el cultivo esta en uso en detalles o ejecuciones de rotacion
         $tieneDetalles = DetalleRotacion::where('cultivo_id', $cultivo->id)->exists();
-
         $tieneEjecuciones = EjecucionRotacion::whereHas('detalle', function ($q) use ($cultivo) {
             $q->where('cultivo_id', $cultivo->id);
         })->exists();
 
         if ($tieneDetalles || $tieneEjecuciones) {
             return redirect()->route('cultivos.index')
-                ->with('error', 'no se puede eliminar el cultivo porque esta siendo utilizado en detalles o ejecuciones de rotacion.');
+                ->with('error', 'no se puede eliminar el cultivo porque está siendo utilizado en detalles o ejecuciones de rotación.');
         }
 
         try {
-            // eliminar imagen asociada si existe
             if ($cultivo->imagen && file_exists(public_path($cultivo->imagen))) {
                 unlink(public_path($cultivo->imagen));
             }
@@ -167,10 +208,10 @@ class CultivoController extends Controller
             $cultivo->delete();
 
             return redirect()->route('cultivos.index')
-                ->with('success', 'cultivo eliminado correctamente.');
+                ->with('success', 'Cultivo eliminado correctamente.');
         } catch (\Exception $e) {
             return redirect()->route('cultivos.index')
-                ->with('error', 'error al eliminar el cultivo: ' . $e->getMessage());
+                ->with('error', 'Error al eliminar el cultivo: ' . $e->getMessage());
         }
     }
 }

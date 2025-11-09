@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class ClimaController extends Controller
 {
@@ -69,11 +70,11 @@ class ClimaController extends Controller
                 if ($response->successful()) {
                     return $response->json();
                 } else {
-                    \Log::error('error api clima: ' . $response->status());
+                    Log::error('Error API clima: ' . $response->status());
                     return $this->datosPrueba();
                 }
             } catch (\Exception $e) {
-                \Log::error('error obteniendo clima: ' . $e->getMessage());
+                Log::error('Error obteniendo clima: ' . $e->getMessage());
                 return $this->datosPrueba();
             }
         });
@@ -94,10 +95,11 @@ class ClimaController extends Controller
                 if ($response->successful()) {
                     return $response->json();
                 } else {
+                    Log::error('Error API pronóstico: ' . $response->status());
                     return $this->pronosticoPrueba();
                 }
             } catch (\Exception $e) {
-                \Log::error('error obteniendo pronostico: ' . $e->getMessage());
+                Log::error('Error obteniendo pronóstico: ' . $e->getMessage());
                 return $this->pronosticoPrueba();
             }
         });
@@ -118,7 +120,7 @@ class ClimaController extends Controller
                 return $response->json();
             }
         } catch (\Exception $e) {
-            \Log::error('error obteniendo clima por coordenadas: ' . $e->getMessage());
+            Log::error('Error obteniendo clima por coordenadas: ' . $e->getMessage());
         }
 
         return $this->datosPrueba();
@@ -161,13 +163,12 @@ class ClimaController extends Controller
         $viento = $clima['wind']['speed'] * 3.6; // convertir a km/h
         $lluvia = $clima['rain']['1h'] ?? 0;
 
-        // alerta de heladas para cultivos andinos sensibles
         if ($temperatura < 5) {
             $alertas[] = [
                 'tipo' => 'helada',
                 'nivel' => 'alto',
                 'mensaje' => 'riesgo alto de heladas',
-                'descripcion' => 'temperatura critica para cultivos sensibles',
+                'descripcion' => 'temperatura crítica para cultivos sensibles',
                 'icono' => 'fas fa-temperature-low',
                 'accion' => 'cubrir papa, oca y papalisa. evitar riego nocturno.',
                 'condicion' => "temperatura: {$temperatura}°c"
@@ -184,13 +185,12 @@ class ClimaController extends Controller
             ];
         }
 
-        // alerta de lluvia intensa
         if ($lluvia > 15) {
             $alertas[] = [
                 'tipo' => 'lluvia_intensa',
                 'nivel' => 'alto',
                 'mensaje' => 'lluvia intensa',
-                'descripcion' => 'precipitacion fuerte detectada',
+                'descripcion' => 'precipitación fuerte detectada',
                 'icono' => 'fas fa-cloud-rain',
                 'accion' => 'revisar drenajes y evitar labores en campo',
                 'condicion' => "lluvia: {$lluvia}mm/h"
@@ -200,14 +200,13 @@ class ClimaController extends Controller
                 'tipo' => 'lluvia',
                 'nivel' => 'medio',
                 'mensaje' => 'lluvia moderada',
-                'descripcion' => 'precipitacion en curso',
+                'descripcion' => 'precipitación en curso',
                 'icono' => 'fas fa-cloud-rain',
                 'accion' => 'adecuado para riego natural',
                 'condicion' => "lluvia: {$lluvia}mm/h"
             ];
         }
 
-        // alerta de viento fuerte
         if ($viento > 40) {
             $alertas[] = [
                 'tipo' => 'viento_fuerte',
@@ -220,7 +219,6 @@ class ClimaController extends Controller
             ];
         }
 
-        // alerta de sequia humedad baja
         if ($humedad < 30 && $lluvia == 0) {
             $alertas[] = [
                 'tipo' => 'sequia',
@@ -233,7 +231,6 @@ class ClimaController extends Controller
             ];
         }
 
-        // alerta de calor extremo
         if ($temperatura > 28) {
             $alertas[] = [
                 'tipo' => 'calor',

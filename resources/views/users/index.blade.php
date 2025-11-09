@@ -49,7 +49,8 @@
         {{-- Estadísticas Rápidas --}}
         <div class="row mb-4">
             <div class="col-xl-3 col-md-6 mb-3">
-                <div class="info-box" style="background: linear-gradient(135deg, var(--andino-oscuro) 0%, var(--andino-hoja) 100%); color: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                <div class="info-box"
+                    style="background: linear-gradient(135deg, var(--andino-oscuro) 0%, var(--andino-hoja) 100%); color: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
                     <span class="info-box-icon"><i class="fas fa-users"></i></span>
                     <div class="info-box-content">
                         <span class="info-box-text">Total Usuarios</span>
@@ -58,7 +59,8 @@
                 </div>
             </div>
             <div class="col-xl-3 col-md-6 mb-3">
-                <div class="info-box" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                <div class="info-box"
+                    style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
                     <span class="info-box-icon"><i class="fas fa-user-check"></i></span>
                     <div class="info-box-content">
                         <span class="info-box-text">Activos</span>
@@ -67,20 +69,24 @@
                 </div>
             </div>
             <div class="col-xl-3 col-md-6 mb-3">
-                <div class="info-box" style="background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%); color: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                <div class="info-box"
+                    style="background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%); color: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
                     <span class="info-box-icon"><i class="fas fa-user-tie"></i></span>
                     <div class="info-box-content">
                         <span class="info-box-text">Técnicos</span>
-                        <span class="info-box-number">{{ $users->filter(fn($u) => $u->roles->contains('name', 'TecnicoAgronomo'))->count() }}</span>
+                        <span
+                            class="info-box-number">{{ $users->filter(fn($u) => $u->roles->contains('name', 'TecnicoAgronomo'))->count() }}</span>
                     </div>
                 </div>
             </div>
             <div class="col-xl-3 col-md-6 mb-3">
-                <div class="info-box" style="background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%); color: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                <div class="info-box"
+                    style="background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%); color: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
                     <span class="info-box-icon"><i class="fas fa-tractor"></i></span>
                     <div class="info-box-content">
                         <span class="info-box-text">Agricultores</span>
-                        <span class="info-box-number">{{ $users->filter(fn($u) => $u->roles->contains('name', 'Agricultor'))->count() }}</span>
+                        <span
+                            class="info-box-number">{{ $users->filter(fn($u) => $u->roles->contains('name', 'Agricultor'))->count() }}</span>
                     </div>
                 </div>
             </div>
@@ -90,22 +96,35 @@
             <table id="tabla-usuarios" class="table table-hover table-striped" style="width:100%">
                 <thead>
                     <tr>
-                        <th width="60" style="background: linear-gradient(135deg, var(--andino-oscuro) 0%, var(--andino-hoja) 100%); color: white; border: none; font-weight: 600; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px; padding: 1rem 0.75rem; vertical-align: middle;">Foto</th>
-                        <th style="background: linear-gradient(135deg, var(--andino-oscuro) 0%, var(--andino-hoja) 100%); color: white; border: none; font-weight: 600; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px; padding: 1rem 0.75rem; vertical-align: middle;">Información</th>
-                        <th style="background: linear-gradient(135deg, var(--andino-oscuro) 0%, var(--andino-hoja) 100%); color: white; border: none; font-weight: 600; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px; padding: 1rem 0.75rem; vertical-align: middle;">Rol</th>
-                        <th style="background: linear-gradient(135deg, var(--andino-oscuro) 0%, var(--andino-hoja) 100%); color: white; border: none; font-weight: 600; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px; padding: 1rem 0.75rem; vertical-align: middle;">Estado</th>
-                        <th width="180" class="text-center" style="background: linear-gradient(135deg, var(--andino-oscuro) 0%, var(--andino-hoja) 100%); color: white; border: none; font-weight: 600; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px; padding: 1rem 0.75rem; vertical-align: middle;">Acciones</th>
+                        <th width="60"
+                            style="background: linear-gradient(135deg, var(--andino-oscuro) 0%, var(--andino-hoja) 100%); color: white; border: none; font-weight: 600; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px; padding: 1rem 0.75rem; vertical-align: middle;">
+                            Foto</th>
+                        <th
+                            style="background: linear-gradient(135deg, var(--andino-oscuro) 0%, var(--andino-hoja) 100%); color: white; border: none; font-weight: 600; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px; padding: 1rem 0.75rem; vertical-align: middle;">
+                            Información</th>
+                        <th
+                            style="background: linear-gradient(135deg, var(--andino-oscuro) 0%, var(--andino-hoja) 100%); color: white; border: none; font-weight: 600; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px; padding: 1rem 0.75rem; vertical-align: middle;">
+                            Rol</th>
+                        <th
+                            style="background: linear-gradient(135deg, var(--andino-oscuro) 0%, var(--andino-hoja) 100%); color: white; border: none; font-weight: 600; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px; padding: 1rem 0.75rem; vertical-align: middle;">
+                            Estado</th>
+                        <th width="180" class="text-center"
+                            style="background: linear-gradient(135deg, var(--andino-oscuro) 0%, var(--andino-hoja) 100%); color: white; border: none; font-weight: 600; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px; padding: 1rem 0.75rem; vertical-align: middle;">
+                            Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($users as $u)
                         <tr class="{{ $u->estado ? '' : 'table-secondary' }}">
                             <td style="padding: 1rem 0.75rem; vertical-align: middle;">
-                                <div style="width: 50px; height: 50px; border-radius: 50%; overflow: hidden; border: 3px solid #e9ecef; transition: all 0.3s ease; margin: 0 auto;">
+                                <div
+                                    style="width: 50px; height: 50px; border-radius: 50%; overflow: hidden; border: 3px solid #e9ecef; transition: all 0.3s ease; margin: 0 auto;">
                                     @if($u->foto && file_exists(public_path($u->foto)))
-                                        <img src="{{ asset($u->foto) }}" style="width: 100%; height: 100%; object-fit: cover;" alt="{{ $u->name }}">
+                                        <img src="{{ asset($u->foto) }}" style="width: 100%; height: 100%; object-fit: cover;"
+                                            alt="{{ $u->name }}">
                                     @else
-                                        <div style="width: 100%; height: 100%; background: linear-gradient(135deg, var(--andino-oscuro) 0%, var(--andino-hoja) 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.2rem;">
+                                        <div
+                                            style="width: 100%; height: 100%; background: linear-gradient(135deg, var(--andino-oscuro) 0%, var(--andino-hoja) 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.2rem;">
                                             <i class="fas fa-user"></i>
                                         </div>
                                     @endif
@@ -116,12 +135,15 @@
                                     <h6 class="mb-2 font-weight-bold text-dark">{{ $u->name }}</h6>
                                     <div style="line-height: 1.4;">
                                         <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
-                                            <i class="fas fa-envelope me-2 text-muted" style="width: 16px; text-align: center; font-size: 0.8rem;"></i>
+                                            <i class="fas fa-envelope me-2 text-muted"
+                                                style="width: 16px; text-align: center; font-size: 0.8rem;"></i>
                                             <span class="text-muted small">{{ $u->email }}</span>
                                         </div>
                                         <div style="display: flex; align-items: center;">
-                                            <i class="fas fa-calendar me-2 text-muted" style="width: 16px; text-align: center; font-size: 0.8rem;"></i>
-                                            <span class="text-muted small">Registro: {{ $u->created_at->format('d/m/Y') }}</span>
+                                            <i class="fas fa-calendar me-2 text-muted"
+                                                style="width: 16px; text-align: center; font-size: 0.8rem;"></i>
+                                            <span class="text-muted small">Registro:
+                                                {{ $u->created_at->format('d/m/Y') }}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -129,7 +151,7 @@
                             <td style="padding: 1rem 0.75rem; vertical-align: middle;">
                                 @php
                                     $roleName = $u->roles->pluck('name')->first() ?? '-';
-                                    $badgeClass = match($roleName) {
+                                    $badgeClass = match ($roleName) {
                                         'Administrador' => 'badge-danger',
                                         'TecnicoAgronomo' => 'badge-warning',
                                         'Agricultor' => 'badge-success',
@@ -146,22 +168,20 @@
                             </td>
                             <td style="padding: 1rem 0.75rem; vertical-align: middle;" class="text-center">
                                 <div class="btn-group btn-group-sm" role="group">
-                                    <a href="{{ route('users.show', $u) }}" class="btn btn-info" 
-                                       data-toggle="tooltip" title="Ver Detalles">
+                                    <a href="{{ route('users.show', $u) }}" class="btn btn-info" data-toggle="tooltip"
+                                        title="Ver Detalles">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    <a href="{{ route('users.edit', $u) }}" class="btn btn-warning" 
-                                       data-toggle="tooltip" title="Editar">
+                                    <a href="{{ route('users.edit', $u) }}" class="btn btn-warning" data-toggle="tooltip"
+                                        title="Editar">
                                         <i class="fas fa-edit"></i>
                                     </a>
                                     <form action="{{ route('users.toggle', $u) }}" method="POST" class="d-inline">
                                         @csrf
                                         @method('PATCH')
-                                        <button type="submit" 
-                                                class="btn {{ $u->estado ? 'btn-danger' : 'btn-success' }}" 
-                                                data-toggle="tooltip" 
-                                                title="{{ $u->estado ? 'Desactivar' : 'Activar' }}"
-                                                onclick="return confirm('¿Está seguro de {{ $u->estado ? 'desactivar' : 'activar' }} a {{ $u->name }}?')">
+                                        <button type="submit" class="btn {{ $u->estado ? 'btn-danger' : 'btn-success' }}"
+                                            data-toggle="tooltip" title="{{ $u->estado ? 'Desactivar' : 'Activar' }}"
+                                            onclick="return confirm('¿Está seguro de {{ $u->estado ? 'desactivar' : 'activar' }} a {{ $u->name }}?')">
                                             @if($u->estado)
                                                 <i class="fas fa-user-slash"></i>
                                             @else
@@ -187,58 +207,58 @@
 <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap4.min.css">
 
 <style>
-/* Solo estilos específicos para esta página */
-.info-box {
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    backdrop-filter: blur(10px);
-    transition: all 0.3s ease;
-}
-
-.info-box:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-}
-
-.info-box-icon {
-    font-size: 1.8rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.btn-group .btn {
-    border-radius: 6px;
-    margin: 0 2px;
-}
-
-.btn-group .btn:first-child {
-    margin-left: 0;
-}
-
-.btn-group .btn:last-child {
-    margin-right: 0;
-}
-
-.table tbody tr:hover {
-    background: rgba(45, 106, 79, 0.05) !important;
-}
-
-/* Responsive para móviles */
-@media (max-width: 768px) {
-    .table thead th {
-        font-size: 0.7rem;
-        padding: 0.75rem 0.5rem !important;
+    /* Solo estilos específicos para esta página */
+    .info-box {
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
     }
-    
-    .table tbody td {
-        padding: 0.75rem 0.5rem !important;
+
+    .info-box:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
     }
-    
-    .avatar-wrapper {
-        width: 40px;
-        height: 40px;
+
+    .info-box-icon {
+        font-size: 1.8rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
-}
+
+    .btn-group .btn {
+        border-radius: 6px;
+        margin: 0 2px;
+    }
+
+    .btn-group .btn:first-child {
+        margin-left: 0;
+    }
+
+    .btn-group .btn:last-child {
+        margin-right: 0;
+    }
+
+    .table tbody tr:hover {
+        background: rgba(45, 106, 79, 0.05) !important;
+    }
+
+    /* Responsive para móviles */
+    @media (max-width: 768px) {
+        .table thead th {
+            font-size: 0.7rem;
+            padding: 0.75rem 0.5rem !important;
+        }
+
+        .table tbody td {
+            padding: 0.75rem 0.5rem !important;
+        }
+
+        .avatar-wrapper {
+            width: 40px;
+            height: 40px;
+        }
+    }
 </style>
 @stop
 
@@ -258,13 +278,12 @@
 
 <script>
 $(document).ready(function () {
-    // Inicializar DataTables
     $('#tabla-usuarios').DataTable({
         responsive: true,
         autoWidth: false,
         language: {
-            url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
-        },
+            url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
+        }, // 👈 ESTA COMA ES CLAVE
         dom: '<"row"<"col-md-6"B><"col-md-6"f>>rtip',
         buttons: [
             {
@@ -294,19 +313,11 @@ $(document).ready(function () {
         ],
         order: [[1, 'asc']],
         columnDefs: [
-            { 
-                targets: [4], 
-                orderable: false,
-                className: 'text-center'
-            },
-            {
-                targets: [0],
-                orderable: false
-            }
+            { targets: [4], orderable: false, className: 'text-center' },
+            { targets: [0], orderable: false }
         ]
     });
 
-    // Inicializar tooltips
     $('[data-toggle="tooltip"]').tooltip();
 });
 </script>

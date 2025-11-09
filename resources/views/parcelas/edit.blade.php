@@ -37,17 +37,18 @@
             </div>
 
             <div class="form-group">
-                <label><i class="fas fa-signature"></i> Nombre</label>
+                <label><i class="fas fa-signature"></i> Código Nombre</label>
                 <input type="text" name="nombre" value="{{ old('nombre', $parcela->nombre) }}" class="form-control" required>
             </div>
 
             <div class="form-group">
-                <label><i class="fas fa-ruler-combined"></i> Superficie (m²)</label>
-                <input type="number" step="0.01" name="extension" value="{{ old('extension', $parcela->extension) }}" class="form-control" required>
+                <label><i class="fas fa-ruler-combined"></i> Superficie (ha)</label>
+                <input type="number" step="0.0001" name="extension" id="extension" value="{{ old('extension', $parcela->extension) }}" class="form-control" required readonly>
+                <small class="text-muted">Se calculará automáticamente al editar o dibujar el polígono.</small>
             </div>
 
             <div class="form-group">
-                <label><i class="fas fa-map-marker-alt"></i> Ubicación</label>
+                <label><i class="fas fa-map-marker-alt"></i> Descripción de la Ubicación</label>
                 <input type="text" name="ubicacion" value="{{ old('ubicacion', $parcela->ubicacion) }}" class="form-control" required>
             </div>
 
@@ -74,7 +75,7 @@
 
             <div class="form-group">
                 <label><i class="fas fa-draw-polygon"></i> Editar polígono en el mapa</label>
-                <div id="map" style="height:400px;"></div>
+                <div id="map" style="height:420px; border:1px solid #ccc;"></div>
                 <input type="hidden" name="poligono" id="poligono" value='@json($parcela->poligono)'>
             </div>
 
@@ -93,57 +94,127 @@
 
 @section('css')
 <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css"/>
-<style>
-    .card {
-        border: none;
-        border-radius: 10px;
-    }
-    .btn {
-        border-radius: 6px;
-        margin-left: 5px;
-    }
-</style>
 @stop
 
 @section('js')
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+
 <script>
-    var map = L.map('map').setView([-17.582086030305437, -65.70528192684172], 17);
-    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/' +
-        'World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-        attribution: 'Tiles © Esri, Earthstar Geographics, Maxar',
-        maxZoom: 17
-    }).addTo(map);
+    document.addEventListener('DOMContentLoaded', function () {
+        const coloresSuelo = {
+            'Arenoso': '#F9E79F',
+            'Arcilloso': '#A569BD',
+            'Franco': '#58D68D',
+            'Pedregoso': '#7F8C8D',
+            'Limoso': '#85C1E9'
+        };
 
-    var drawnItems = new L.FeatureGroup();
-    map.addLayer(drawnItems);
+        const map = L.map('map').setView([-17.5837, -65.7040], 15);
 
-    var drawControl = new L.Control.Draw({
-        edit: { featureGroup: drawnItems },
-        draw: { polygon: true, marker: false, circle: false, polyline: false, rectangle: false }
-    });
-    map.addControl(drawControl);
+        // Capas base
+        const googleSat = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+            maxZoom: 20,
+            subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+        }).addTo(map);
 
-    var poligono = {!! json_encode($parcela->poligono) !!};
-    if (poligono) {
-        var layer = L.geoJSON(poligono).getLayers()[0];
-        drawnItems.addLayer(layer);
-        map.fitBounds(layer.getBounds());
-    }
+        const osmMap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap contributors'
+        });
 
-    map.on(L.Draw.Event.CREATED, function (e) {
-        drawnItems.clearLayers();
-        var layer = e.layer;
-        drawnItems.addLayer(layer);
-        document.getElementById('poligono').value = JSON.stringify(layer.toGeoJSON());
-    });
+        L.control.layers({ 'Satélite': googleSat, 'Mapa base': osmMap }).addTo(map);
 
-    map.on('draw:edited', function () {
-        drawnItems.eachLayer(function (layer) {
-            document.getElementById('poligono').value = JSON.stringify(layer.toGeoJSON());
+        // Capas de parcelas existentes
+        const parcelasLayer = L.featureGroup().addTo(map);
+
+        @foreach($parcelas ?? [] as $p)
+            @if(!empty($p->poligono))
+                try {
+                    const poligonoData = {!! json_encode($p->poligono) !!};
+                    if (poligonoData && poligonoData.geometry) {
+                        const layer = L.geoJSON(poligonoData, {
+                            style: {
+                                fillColor: coloresSuelo['{{ $p->tipoSuelo }}'] || '#3498DB',
+                                color: '#2C3E50',
+                                weight: 1.5,
+                                fillOpacity: 0.5
+                            }
+                        }).bindPopup(`<strong>{{ $p->nombre }}</strong><br>
+                            {{ $p->agricultor->name ?? 'Sin agricultor' }}<br>
+                            <small>{{ $p->tipoSuelo }} - {{ $p->usoSuelo }}</small>`);
+                        layer.addTo(parcelasLayer);
+                    }
+                } catch (error) {
+                    console.error('Error en parcela {{ $p->id }}:', error);
+                }
+            @endif
+        @endforeach
+
+        // Grupo para edición
+        const drawnItems = new L.FeatureGroup();
+        map.addLayer(drawnItems);
+
+        // Cargar polígono actual
+        const poligono = {!! json_encode($parcela->poligono) !!};
+        if (poligono) {
+            const layer = L.geoJSON(poligono).getLayers()[0];
+            drawnItems.addLayer(layer);
+            map.fitBounds(layer.getBounds().pad(0.1));
+
+            // Calcular área inicial en hectáreas
+            const area = turf.area(layer.toGeoJSON());
+            const areaHa = parseFloat((area / 10000).toFixed(2));
+            document.getElementById('extension').value = areaHa;
+            layer.bindPopup(`<b>Área:</b> ${area.toFixed(2)} m² (${areaHa} ha)`);
+        } else if (parcelasLayer.getLayers().length > 0) {
+            map.fitBounds(parcelasLayer.getBounds().pad(0.1));
+        }
+
+        // Control de dibujo
+        const drawControl = new L.Control.Draw({
+            draw: {
+                polygon: true,
+                polyline: false,
+                rectangle: false,
+                circle: false,
+                marker: false,
+                circlemarker: false
+            },
+            edit: { featureGroup: drawnItems }
+        });
+        map.addControl(drawControl);
+
+        // Crear nuevo polígono
+        map.on(L.Draw.Event.CREATED, function (e) {
+            drawnItems.clearLayers();
+            const layer = e.layer;
+            drawnItems.addLayer(layer);
+
+            const geojson = layer.toGeoJSON();
+            document.getElementById('poligono').value = JSON.stringify(geojson);
+
+            const area = turf.area(geojson);
+            const areaHa = parseFloat((area / 10000).toFixed(2));
+            document.getElementById('extension').value = areaHa;
+            layer.bindPopup(`<b>Área:</b> ${area.toFixed(2)} m² (${areaHa} ha)`).openPopup();
+        });
+
+        // Editar polígono existente
+        map.on(L.Draw.Event.EDITED, function () {
+            const layers = drawnItems.getLayers();
+            if (layers.length > 0) {
+                const geojson = layers[0].toGeoJSON();
+                document.getElementById('poligono').value = JSON.stringify(geojson);
+
+                const area = turf.area(geojson);
+                const areaHa = parseFloat((area / 10000).toFixed(2));
+                document.getElementById('extension').value = areaHa;
+                layers[0].bindPopup(`<b>Área:</b> ${area.toFixed(2)} m² (${areaHa} ha)`).openPopup();
+            }
         });
     });
 </script>

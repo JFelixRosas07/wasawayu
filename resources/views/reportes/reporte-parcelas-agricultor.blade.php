@@ -3,7 +3,7 @@
 @section('title', 'Reporte de Parcelas por Agricultor')
 
 @section('content_header')
-<h1 class="text-success fw-bold">
+<h1 class="text-success fw-bold display-6">
     <i class="fas fa-map-marked-alt me-2"></i>Reporte de Parcelas por Agricultor
 </h1>
 @stop
@@ -27,10 +27,9 @@
 </div>
 
 {{-- Panel de filtros --}}
-<div class="card shadow-sm border-0 mb-4">
-    <div class="card-header bg-success text-white py-2 d-flex align-items-center">
-        <i class="fas fa-filter me-2"></i>
-        <span class="fw-semibold">Filtros de Búsqueda</span>
+<div class="card shadow-lg border-0 mb-4">
+    <div class="card-header bg-success text-white fw-bold py-3">
+        <i class="fas fa-filter me-2"></i>Filtros de Búsqueda
     </div>
     <div class="card-body py-3">
         <div class="row align-items-end g-3">
@@ -79,17 +78,13 @@
 
     {{-- Tabla detallada --}}
     <div class="card shadow-lg border-0">
-        <div class="card-header bg-success text-white py-3">
-            <div class="d-flex justify-content-between align-items-center">
-                <h4 class="mb-0 fw-bold">
-                    <i class="fas fa-table me-2"></i>Detalle de Parcelas
-                </h4>
-                <span class="badge bg-light text-success fs-6" id="contadorParcelas"></span>
-            </div>
+        <div class="card-header bg-success text-white fw-bold py-3">
+            <i class="fas fa-table me-2"></i>Detalle de Parcelas
+            <span class="badge bg-light text-success fs-6 float-end" id="contadorParcelas"></span>
         </div>
-        <div class="card-body p-3">
+        <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-bordered table-striped table-hover align-middle mb-0" id="tablaDatos">
+                <table class="table table-striped table-bordered table-hover align-middle mb-0" id="tablaDatos">
                     <thead class="bg-success text-white">
                         <tr>
                             <th>Agricultor</th>
@@ -118,17 +113,62 @@
 </div>
 @stop
 
+{{-- === Estilos iguales al reporte de cultivos === --}}
+@push('css')
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap5.min.css">
+
+<style>
+/* === Botones DataTables === */
+.dt-buttons .btn {
+    margin-right: 5px;
+    border-radius: 4px;
+    font-size: 14px;
+    padding: 6px 12px;
+    border: none;
+    color: white !important;
+    font-weight: 500;
+}
+
+/* Excel - verde */
+.dt-buttons .buttons-excel {
+    background-color: #28a745 !important;
+}
+.dt-buttons .buttons-excel:hover {
+    background-color: #218838 !important;
+}
+
+/* PDF - rojo */
+.dt-buttons .buttons-pdf {
+    background-color: #dc3545 !important;
+}
+.dt-buttons .buttons-pdf:hover {
+    background-color: #c82333 !important;
+}
+
+/* Imprimir - gris */
+.dt-buttons .buttons-print {
+    background-color: #6c757d !important;
+}
+.dt-buttons .buttons-print:hover {
+    background-color: #545b62 !important;
+}
+
+/* Tarjetas y tablas */
+.card { border-radius: 12px; }
+.table th { font-weight: 700; font-size: 0.95rem; }
+</style>
+@endpush
+
 @section('js')
 {{-- jsPDF --}}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
 {{-- DataTables + Buttons --}}
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
-<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap5.min.css">
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.bootstrap5.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -241,7 +281,11 @@ document.addEventListener('DOMContentLoaded', function () {
             pageLength: 10,
             responsive: true,
             dom: 'Bfrtip',
-            buttons: ['copy', 'csv', 'excel', 'pdf', 'print'],
+            buttons: [
+                { extend: 'excelHtml5', text: '<i class="fas fa-file-excel"></i> Excel', className: 'btn btn-success btn-sm buttons-excel' },
+                { extend: 'pdfHtml5', text: '<i class="fas fa-file-pdf"></i> PDF', className: 'btn btn-danger btn-sm buttons-pdf', orientation: 'landscape', pageSize: 'A4' },
+                { extend: 'print', text: '<i class="fas fa-print"></i> Imprimir', className: 'btn btn-secondary btn-sm buttons-print' }
+            ],
             language: { url: "https://cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json" },
             order: [[1, 'asc']]
         });
@@ -283,15 +327,4 @@ document.addEventListener('DOMContentLoaded', function () {
     @endif
 });
 </script>
-
-<style>
-.card { border-radius: 12px; }
-.table th { font-weight: 700; font-size: 0.95rem; }
-.btn-lg { font-size: 1.1rem; padding: 0.75rem 1.5rem; }
-.badge { font-size: 0.8rem; }
-@media (max-width: 768px) {
-    .btn-lg { font-size: 1rem; padding: 0.6rem 1.2rem; }
-    .table-responsive { font-size: 0.9rem; }
-}
-</style>
 @stop

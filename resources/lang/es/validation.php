@@ -2,6 +2,12 @@
 
 return [
 
+    /*
+    |--------------------------------------------------------------------------
+    | Líneas de idioma de validación
+    |--------------------------------------------------------------------------
+    */
+
     'accepted' => 'El campo :attribute debe ser aceptado.',
     'active_url' => 'El campo :attribute no es una URL válida.',
     'after' => 'El campo :attribute debe ser una fecha posterior a :date.',
@@ -41,6 +47,9 @@ return [
     'integer' => 'El campo :attribute debe ser un número entero.',
     'numeric' => 'El campo :attribute debe ser numérico.',
 
+    // ✅ Mensaje personalizado para regex
+    'regex' => 'El formato del campo :attribute es inválido. Solo se permiten letras y espacios.',
+
     /*
     |--------------------------------------------------------------------------
     | Mensajes personalizados
@@ -58,7 +67,7 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Atributos
+    | Atributos personalizados
     |--------------------------------------------------------------------------
     */
     'attributes' => [

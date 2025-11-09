@@ -11,7 +11,7 @@
     <div class="card-header">
         <div class="d-flex justify-content-between align-items-center">
 
-            {{--Roles corregidos --}}
+            {{-- Roles corregidos --}}
             @if(auth()->user()->hasAnyRole(['Administrador', 'TecnicoAgronomo']))
                 <a href="{{ route('parcelas.create') }}" class="btn btn-primary">
                     <i class="fas fa-plus"></i> Nueva Parcela
@@ -45,7 +45,6 @@
             </div>
         @endif
 
-
         @if($errors->any())
             <div class="alert alert-danger">
                 <ul class="mb-0">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul>
@@ -56,10 +55,10 @@
             <table id="tabla-parcelas" class="table table-bordered table-striped table-hover">
                 <thead>
                     <tr>
-                        <th><i class="fas fa-signature"></i> Nombre</th>
+                        <th><i class="fas fa-signature"></i> Código Nombre</th>
                         <th><i class="fas fa-user"></i> Agricultor</th>
-                        <th><i class="fas fa-ruler-combined"></i> Superficie (m²)</th>
-                        <th><i class="fas fa-map-marker-alt"></i> Ubicación</th>
+                        <th><i class="fas fa-ruler-combined"></i> Superficie (ha)</th>
+                        <th><i class="fas fa-map-marker-alt"></i> Descripción de la Ubicación</th>
                         <th><i class="fas fa-seedling"></i> Uso Actual</th>
                         <th><i class="fas fa-cogs"></i> Acciones</th>
                     </tr>
@@ -75,28 +74,24 @@
                                 @endif
                                 {{ optional($parcela->agricultor)->name ?? 'No asignado' }}
                             </td>
-                            <td>{{ number_format($parcela->extension, 2) }}</td>
+                            <td>{{ rtrim(rtrim(number_format($parcela->extension, 2, '.', ''), '0'), '.') }}</td>
                             <td>{{ $parcela->ubicacion }}</td>
                             <td>
                                 <span class="badge badge-info">{{ $parcela->usoSuelo }}</span>
                             </td>
-
                             <td class="text-center">
                                 <div class="btn-group" role="group">
                                     {{-- 🔹 Todos pueden ver --}}
-                                    <a href="{{ route('parcelas.show', $parcela) }}" class="btn btn-sm btn-primary"
-                                        title="Ver Detalle">
+                                    <a href="{{ route('parcelas.show', $parcela) }}" class="btn btn-sm btn-primary" title="Ver Detalle">
                                         <i class="fas fa-eye"></i>
                                     </a>
 
-                                    {{-- 🔹 SOLUCIÓN: Roles corregidos --}}
+                                    {{-- 🔹 Roles con permisos --}}
                                     @if(auth()->user()->hasAnyRole(['Administrador', 'TecnicoAgronomo']))
-                                        <a href="{{ route('parcelas.edit', $parcela) }}" class="btn btn-sm btn-warning"
-                                            title="Editar">
+                                        <a href="{{ route('parcelas.edit', $parcela) }}" class="btn btn-sm btn-warning" title="Editar">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <form action="{{ route('parcelas.destroy', $parcela) }}" method="POST"
-                                            class="form-delete d-inline">
+                                        <form action="{{ route('parcelas.destroy', $parcela) }}" method="POST" class="form-delete d-inline">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
@@ -119,6 +114,13 @@
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap4.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap4.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap4.min.css">
+
+<style>
+/* Evita el destello de contenido sin estilo (FOUC) */
+#tabla-parcelas {
+    visibility: hidden;
+}
+</style>
 @stop
 
 @section('js')
@@ -137,11 +139,12 @@
 
 <script>
     $(document).ready(function () {
+        // Inicializar DataTables
         $('#tabla-parcelas').DataTable({
             responsive: true,
             autoWidth: false,
             language: {
-                url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
+                url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
             },
             dom: 'Bfrtip',
             buttons: [
@@ -155,7 +158,12 @@
                     extend: 'pdfHtml5',
                     text: '<i class="fas fa-file-pdf"></i> PDF',
                     className: 'btn btn-danger btn-sm',
-                    exportOptions: { columns: [0, 1, 2, 3, 4] }
+                    exportOptions: { columns: [0, 1, 2, 3, 4] },
+                    customize: function (doc) {
+                        doc.defaultStyle.fontSize = 9;
+                        doc.styles.tableHeader.fontSize = 10;
+                        doc.content[1].table.widths = ['20%', '25%', '15%', '25%', '15%'];
+                    }
                 },
                 {
                     extend: 'print',
@@ -169,6 +177,10 @@
             ]
         });
 
+        // Mostrar tabla una vez cargada
+        $('#tabla-parcelas').css('visibility', 'visible');
+
+        // Confirmación elegante al eliminar
         $('#tabla-parcelas').on('submit', '.form-delete', function (e) {
             e.preventDefault();
             var form = this;

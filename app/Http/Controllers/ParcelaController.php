@@ -6,6 +6,7 @@ use App\Models\Parcela;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class ParcelaController extends Controller
 {
@@ -13,47 +14,55 @@ class ParcelaController extends Controller
     {
         $user = Auth::user();
 
-        // si es agricultor, solo muestra sus parcelas
         if ($user->hasRole('Agricultor')) {
             $parcelas = Parcela::with('agricultor')
                 ->where('agricultor_id', $user->id)
                 ->paginate(10);
         } else {
-            // admin y tecnicoagronomo pueden ver todas
             $parcelas = Parcela::with('agricultor')->paginate(10);
         }
 
         return view('parcelas.index', compact('parcelas'));
     }
 
-    public function create()
-    {
-        $user = Auth::user();
+   public function create()
+{
+    $user = Auth::user();
 
-        // agricultor no puede crear
-        if ($user->hasRole('Agricultor')) {
-            abort(403, 'no tienes permiso para crear parcelas.');
-        }
-
-        $agricultores = User::whereHas('roles', function ($q) {
-            $q->where('name', 'Agricultor');
-        })->pluck('name', 'id');
-
-        return view('parcelas.create', compact('agricultores'));
+    if ($user->hasRole('Agricultor')) {
+        abort(403, 'no tienes permiso para crear parcelas.');
     }
+
+    // Obtener agricultores con rol 'Agricultor'
+    $agricultores = User::whereHas('roles', function ($q) {
+        $q->where('name', 'Agricultor');
+    })->pluck('name', 'id');
+
+    // 🔹 Obtener todas las parcelas existentes con su agricultor
+    $parcelas = Parcela::with('agricultor')->get();
+
+    return view('parcelas.create', compact('agricultores', 'parcelas'));
+}
+
 
     public function store(Request $request)
     {
         $user = Auth::user();
 
-        // agricultor no puede guardar
         if ($user->hasRole('Agricultor')) {
             abort(403, 'no tienes permiso para realizar esta accion.');
         }
 
         $request->validate([
-            'nombre' => 'required|string|max:255',
-            'extension' => 'required|numeric|min:0',
+            'nombre' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('parcelas')->where(function ($query) use ($request) {
+                    return $query->where('agricultor_id', $request->agricultor_id);
+                }),
+            ],
+            'extension' => 'required|numeric|min:0.001',
             'ubicacion' => 'required|string|max:255',
             'tipoSuelo' => 'required|string|max:255',
             'usoSuelo' => 'required|string|max:255',
@@ -82,7 +91,6 @@ class ParcelaController extends Controller
     {
         $user = Auth::user();
 
-        // agricultor solo puede ver sus propias parcelas
         if ($user->hasRole('Agricultor') && $parcela->agricultor_id !== $user->id) {
             abort(403, 'no puedes ver parcelas de otros agricultores.');
         }
@@ -92,33 +100,43 @@ class ParcelaController extends Controller
     }
 
     public function edit(Parcela $parcela)
-    {
-        $user = Auth::user();
+{
+    $user = Auth::user();
 
-        // agricultor no puede editar
-        if ($user->hasRole('Agricultor')) {
-            abort(403, 'no tienes permiso para editar parcelas.');
-        }
-
-        $agricultores = User::whereHas('roles', function ($q) {
-            $q->where('name', 'Agricultor');
-        })->pluck('name', 'id');
-
-        return view('parcelas.edit', compact('parcela', 'agricultores'));
+    if ($user->hasRole('Agricultor')) {
+        abort(403, 'no tienes permiso para editar parcelas.');
     }
+
+    $agricultores = User::whereHas('roles', fn($q) => $q->where('name', 'Agricultor'))
+        ->pluck('name', 'id');
+
+    // 🔹 traer todas las parcelas registradas (para mostrar en el mapa)
+    $parcelas = Parcela::with('agricultor')->get();
+
+    return view('parcelas.edit', compact('parcela', 'agricultores', 'parcelas'));
+}
+
 
     public function update(Request $request, Parcela $parcela)
     {
         $user = Auth::user();
 
-        // agricultor no puede actualizar
         if ($user->hasRole('Agricultor')) {
             abort(403, 'no tienes permiso para actualizar parcelas.');
         }
 
         $request->validate([
-            'nombre' => 'required|string|max:255',
-            'extension' => 'required|numeric|min:0',
+            'nombre' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('parcelas')
+                    ->ignore($parcela->id)
+                    ->where(function ($query) use ($request) {
+                        return $query->where('agricultor_id', $request->agricultor_id);
+                    }),
+            ],
+            'extension' => 'required|numeric|min:0.001',
             'ubicacion' => 'required|string|max:255',
             'tipoSuelo' => 'required|string|max:255',
             'usoSuelo' => 'required|string|max:255',
@@ -147,12 +165,10 @@ class ParcelaController extends Controller
     {
         $user = Auth::user();
 
-        // agricultor no puede eliminar
         if ($user->hasRole('Agricultor')) {
             abort(403, 'no tienes permiso para eliminar parcelas.');
         }
 
-        // verificar si la parcela esta en uso en planes o detalles de rotacion
         $tienePlanes = \App\Models\PlanRotacion::where('parcela_id', $parcela->id)->exists();
 
         $tieneDetalles = \App\Models\DetalleRotacion::whereHas('plan', function ($q) use ($parcela) {

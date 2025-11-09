@@ -3,24 +3,34 @@
 @section('title', 'Mapa General de Parcelas')
 
 @section('content_header')
-    <h1><i class="fas fa-map-marked-alt"></i> Mapa General de Parcelas</h1>
+<h1 class="text-success fw-bold display-6">
+    <i class="fas fa-map-marked-alt me-2"></i>Mapa General de Parcelas
+</h1>
 @stop
 
 @section('content')
-<div class="card shadow-sm">
+<div class="card shadow-lg border-0">
     <div class="card-header bg-success text-white">
         <div class="d-flex justify-content-between align-items-center">
-            <h5 class="mb-0"><i class="fas fa-layer-group"></i> Visualización de Todas las Parcelas Registradas</h5>
-            <a href="{{ route('parcelas.index') }}" class="btn btn-light btn-sm">
-                <i class="fas fa-arrow-left"></i> Volver al Listado
+            <h5 class="mb-0 fw-bold">
+                <i class="fas fa-leaf me-2"></i> Parcelas Registradas
+            </h5>
+            <a href="{{ route('parcelas.index') }}" class="btn btn-success btn-sm">
+                <i class="fas fa-arrow-left me-1"></i> Volver al Listado
             </a>
         </div>
     </div>
+
     <div class="card-body p-0">
         <!-- Estadísticas Rápidas -->
+        @php
+            // Formato limpio de superficie total (máx. 2 decimales)
+            $superficieTotal = rtrim(rtrim(number_format($parcelas->sum('extension'), 2, '.', ''), '0'), '.');
+        @endphp
+
         <div class="row m-3">
             <div class="col-md-3 col-sm-6">
-                <div class="info-box bg-gradient-success">
+                <div class="info-box bg-gradient-success shadow-sm">
                     <span class="info-box-icon"><i class="fas fa-map"></i></span>
                     <div class="info-box-content">
                         <span class="info-box-text">Total Parcelas</span>
@@ -29,7 +39,7 @@
                 </div>
             </div>
             <div class="col-md-3 col-sm-6">
-                <div class="info-box bg-gradient-info">
+                <div class="info-box bg-gradient-info shadow-sm">
                     <span class="info-box-icon"><i class="fas fa-users"></i></span>
                     <div class="info-box-content">
                         <span class="info-box-text">Agricultores</span>
@@ -38,16 +48,16 @@
                 </div>
             </div>
             <div class="col-md-3 col-sm-6">
-                <div class="info-box bg-gradient-warning">
+                <div class="info-box bg-gradient-warning shadow-sm">
                     <span class="info-box-icon"><i class="fas fa-ruler-combined"></i></span>
                     <div class="info-box-content">
                         <span class="info-box-text">Superficie Total</span>
-                        <span class="info-box-number">{{ number_format($parcelas->sum('extension'), 2) }} m²</span>
+                        <span class="info-box-number">{{ $superficieTotal }} ha</span>
                     </div>
                 </div>
             </div>
             <div class="col-md-3 col-sm-6">
-                <div class="info-box bg-gradient-primary">
+                <div class="info-box bg-gradient-primary shadow-sm">
                     <span class="info-box-icon"><i class="fas fa-tractor"></i></span>
                     <div class="info-box-content">
                         <span class="info-box-text">Uso Agrícola</span>
@@ -62,13 +72,13 @@
 
         <!-- Leyenda -->
         <div class="p-3 border-top">
-            <h6><i class="fas fa-key"></i> Leyenda de Tipos de Suelo:</h6>
+            <h6 class="fw-bold text-success"><i class="fas fa-key me-2"></i>Leyenda de Tipos de Suelo</h6>
             <div class="d-flex flex-wrap gap-3">
-                <span class="badge badge-pill" style="background-color: #F9E79F; color: #000;"><i class="fas fa-square"></i> Arenoso</span>
-                <span class="badge badge-pill" style="background-color: #A569BD; color: #fff;"><i class="fas fa-square"></i> Arcilloso</span>
-                <span class="badge badge-pill" style="background-color: #58D68D; color: #000;"><i class="fas fa-square"></i> Franco</span>
-                <span class="badge badge-pill" style="background-color: #7F8C8D; color: #fff;"><i class="fas fa-square"></i> Pedregoso</span>
-                <span class="badge badge-pill" style="background-color: #85C1E9; color: #000;"><i class="fas fa-square"></i> Limoso</span>
+                <span class="badge rounded-pill" style="background-color: #F9E79F; color: #000;"><i class="fas fa-square"></i> Arenoso</span>
+                <span class="badge rounded-pill" style="background-color: #A569BD; color: #fff;"><i class="fas fa-square"></i> Arcilloso</span>
+                <span class="badge rounded-pill" style="background-color: #58D68D; color: #000;"><i class="fas fa-square"></i> Franco</span>
+                <span class="badge rounded-pill" style="background-color: #7F8C8D; color: #fff;"><i class="fas fa-square"></i> Pedregoso</span>
+                <span class="badge rounded-pill" style="background-color: #85C1E9; color: #000;"><i class="fas fa-square"></i> Limoso</span>
             </div>
         </div>
     </div>
@@ -77,16 +87,56 @@
 
 @section('css')
 <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
-<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css"/>
-<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
+
+<style>
+    .parcela-popup {
+        min-width: 250px;
+        font-size: 0.9rem;
+    }
+
+    .parcela-popup h6 {
+        color: #1B4332;
+        margin-bottom: 0.5rem;
+        font-weight: bold;
+    }
+
+    .parcela-popup p {
+        margin-bottom: 0.3rem;
+    }
+
+    .parcela-popup .btn-ver-detalles {
+        background-color: #198754;
+        color: #fff !important;
+        border: none;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        padding: 6px 10px;
+        transition: all 0.2s ease-in-out;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    }
+
+    .parcela-popup .btn-ver-detalles:hover {
+        background-color: #157347;
+        transform: translateY(-1px);
+    }
+
+    .info-box {
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+</style>
 @stop
 
 @section('js')
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+
 <script>
-    // Colores para tipos de suelo
+document.addEventListener('DOMContentLoaded', function () {
     const coloresSuelo = {
         'Arenoso': '#F9E79F',
         'Arcilloso': '#A569BD',
@@ -95,58 +145,66 @@
         'Limoso': '#85C1E9'
     };
 
-    // Inicializar mapa
-    var map = L.map('map').setView([-17.582086030305437, -65.70528192684172], 17);
+    // Inicializar mapa centrado
+    const map = L.map('map').setView([-17.5837, -65.7040], 15);
 
-    // Capa base (Satélite)
-    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/' +
-        'World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-        attribution: 'Tiles © Esri, Earthstar Geographics, Maxar',
-        maxZoom: 17
+    // Capas base
+    const googleSat = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+        maxZoom: 20,
+        subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
     }).addTo(map);
 
-    // Grupo para los polígonos de parcelas
-    var parcelasLayer = L.layerGroup().addTo(map);
+    const osmBase = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap contributors'
+    });
 
-    // Procesar cada parcela
+    L.control.layers({ 'Satélite': googleSat, 'Mapa base': osmBase }).addTo(map);
+
+    // Grupo de parcelas
+    const parcelasLayer = L.featureGroup().addTo(map);
+
+    // Renderizar cada parcela
     @foreach($parcelas as $parcela)
+        @php
+            $extensionDisplay = rtrim(rtrim(number_format($parcela->extension, 2, '.', ''), '0'), '.');
+        @endphp
+
         @if(!empty($parcela->poligono))
             try {
-                var poligonoData = {!! json_encode($parcela->poligono) !!};
-                
+                const poligonoData = {!! json_encode($parcela->poligono) !!};
                 if (poligonoData && poligonoData.geometry) {
-                    var layer = L.geoJSON(poligonoData, {
-                        style: function(feature) {
-                            return {
-                                fillColor: coloresSuelo['{{ $parcela->tipoSuelo }}'] || '#3498DB',
-                                color: '#2C3E50',
-                                weight: 2,
-                                opacity: 0.8,
-                                fillOpacity: 0.6
-                            };
+                    const colorSuelo = coloresSuelo['{{ $parcela->tipoSuelo }}'] || '#3498DB';
+
+                    const layer = L.geoJSON(poligonoData, {
+                        style: {
+                            fillColor: colorSuelo,
+                            color: '#2C3E50',
+                            weight: 2,
+                            fillOpacity: 0.6
                         }
                     });
 
-                    // Agregar popup informativo
+                    // Popup informativo (sin área estimada duplicada)
                     layer.bindPopup(`
                         <div class="parcela-popup">
                             <h6><strong>{{ $parcela->nombre }}</strong></h6>
                             <hr class="my-2">
-                            <p class="mb-1"><strong><i class="fas fa-user"></i> Agricultor:</strong> {{ $parcela->agricultor->name ?? 'No asignado' }}</p>
-                            <p class="mb-1"><strong><i class="fas fa-ruler-combined"></i> Superficie:</strong> {{ number_format($parcela->extension, 2) }} m²</p>
-                            <p class="mb-1"><strong><i class="fas fa-mountain"></i> Tipo Suelo:</strong> 
-                                <span class="badge" style="background-color: ${coloresSuelo['{{ $parcela->tipoSuelo }}'] || '#3498DB'}">{{ $parcela->tipoSuelo }}</span>
+                            <p><strong><i class="fas fa-user me-1"></i>Agricultor:</strong> {{ $parcela->agricultor->name ?? 'No asignado' }}</p>
+                            <p><strong><i class="fas fa-ruler-combined me-1"></i>Superficie:</strong> {{ $extensionDisplay }} ha</p>
+                            <p><strong><i class="fas fa-mountain me-1"></i>Tipo Suelo:</strong>
+                                <span class="badge" style="background-color:${colorSuelo}; color:#fff;">{{ $parcela->tipoSuelo }}</span>
                             </p>
-                            <p class="mb-2"><strong><i class="fas fa-tractor"></i> Uso:</strong> {{ $parcela->usoSuelo }}</p>
-                            <div class="text-center">
-                                <a href="{{ route('parcelas.show', $parcela) }}" class="btn btn-sm btn-primary">
-                                    <i class="fas fa-eye"></i> Ver Detalles
+                            <p><strong><i class="fas fa-tractor me-1"></i>Uso:</strong> {{ $parcela->usoSuelo }}</p>
+                            <div class="text-center mt-2">
+                                <a href="{{ route('parcelas.show', $parcela) }}" class="btn-ver-detalles">
+                                    <i class="fas fa-eye me-1"></i> Ver Detalles
                                 </a>
                             </div>
                         </div>
                     `);
 
-                    parcelasLayer.addLayer(layer);
+                    layer.addTo(parcelasLayer);
                 }
             } catch (error) {
                 console.error('Error procesando parcela {{ $parcela->id }}:', error);
@@ -154,40 +212,12 @@
         @endif
     @endforeach
 
-    // Ajustar vista para mostrar todas las parcelas
+    // Ajustar vista general
     if (parcelasLayer.getLayers().length > 0) {
-        var group = new L.featureGroup(parcelasLayer.getLayers());
-        map.fitBounds(group.getBounds().pad(0.1));
+        map.fitBounds(parcelasLayer.getBounds().pad(0.1));
+    } else {
+        map.setView([-17.5837, -65.7040], 13);
     }
-
-    // Control de capas
-    var baseLayers = {
-        "Satélite": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-            attribution: 'Tiles © Esri'
-        }),
-        "OpenStreetMap": L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
-        })
-    };
-
-    var overlays = {
-        "Parcelas": parcelasLayer
-    };
-
-    L.control.layers(baseLayers, overlays).addTo(map);
+});
 </script>
-
-<style>
-    .parcela-popup {
-        min-width: 250px;
-    }
-    .parcela-popup h6 {
-        color: #1B4332;
-        margin-bottom: 0.5rem;
-    }
-    .info-box {
-        border-radius: 10px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-</style>
 @stop

@@ -3,27 +3,26 @@
 @section('title', 'Reporte de Rotación por Agricultor')
 
 @section('content_header')
-<h1 class="text-success fw-bold">
-    <i class="fas fa-sync-alt me-2"></i> Reporte de Rotación por Agricultor
+<h1 class="text-success fw-bold display-6">
+    <i class="fas fa-sync-alt me-2"></i>Reporte de Rotación por Agricultor
 </h1>
 @stop
 
 @section('content')
 {{-- Encabezado de acciones --}}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <a href="{{ route('reportes.index') }}" class="btn btn-success">
-        <i class="fas fa-arrow-left me-1"></i> Volver al Dashboard
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <a href="{{ route('reportes.index') }}" class="btn btn-success btn-lg">
+        <i class="fas fa-arrow-left me-2"></i> Volver al Dashboard
     </a>
-    <button id="btnPDF" class="btn btn-success" style="display:none;">
+    <button id="btnPDF" class="btn btn-success btn-lg" style="display:none;">
         <i class="fas fa-file-pdf me-1"></i> Exportar PDF
     </button>
 </div>
 
 {{-- Filtros --}}
-<div class="card shadow-sm border-0 mb-4">
-    <div class="card-header bg-success text-white py-2 d-flex align-items-center">
-        <i class="fas fa-filter me-2"></i>
-        <span class="fw-semibold">Filtros de Búsqueda</span>
+<div class="card shadow-lg border-0 mb-4">
+    <div class="card-header bg-success text-white fw-bold py-3">
+        <i class="fas fa-filter me-2"></i>Filtros de Búsqueda
     </div>
     <div class="card-body py-3">
         <div class="row g-3 align-items-end">
@@ -68,9 +67,9 @@
 
 {{-- Resultados --}}
 <div id="areaPDF" style="display:none;">
-    <div class="card shadow-sm border-0">
-        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
-            <strong>Detalles del Plan de Rotación</strong>
+    <div class="card shadow-lg border-0">
+        <div class="card-header bg-success text-white fw-bold d-flex justify-content-between align-items-center">
+            <span><i class="fas fa-seedling me-2"></i>Detalles del Plan de Rotación</span>
             <span id="tituloPlan" class="small"></span>
         </div>
         <div class="card-body">
@@ -80,7 +79,7 @@
                 <strong>Plan:</strong> <span id="impresionPlan"></span>
             </p>
             <div class="table-responsive">
-                <table class="table table-bordered table-striped align-middle text-center" id="tablaDatos">
+                <table class="table table-striped table-bordered table-hover align-middle text-center mb-0" id="tablaDatos">
                     <thead class="bg-success text-white">
                         <tr>
                             <th>Parcela</th>
@@ -99,10 +98,61 @@
 </div>
 
 {{-- Panel sin datos --}}
-<div id="sinDatos" class="alert alert-warning text-center mt-4" style="display:none;">
-    <i class="fas fa-exclamation-triangle me-1"></i> No se encontraron detalles para el plan seleccionado.
+<div id="sinDatos" class="card border-warning text-center py-5 mt-4" style="display:none;">
+    <div class="card-body">
+        <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+        <h4 class="text-warning">No se encontraron detalles</h4>
+        <p class="text-muted">No hay registros disponibles para el plan seleccionado.</p>
+    </div>
 </div>
 @stop
+
+{{-- === Estilos iguales al reporte de cultivos === --}}
+@push('css')
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap5.min.css">
+
+<style>
+/* === Botones DataTables === */
+.dt-buttons .btn {
+    margin-right: 5px;
+    border-radius: 4px;
+    font-size: 14px;
+    padding: 6px 12px;
+    border: none;
+    color: white !important;
+    font-weight: 500;
+}
+
+/* Excel - verde */
+.dt-buttons .buttons-excel {
+    background-color: #28a745 !important;
+}
+.dt-buttons .buttons-excel:hover {
+    background-color: #218838 !important;
+}
+
+/* PDF - rojo */
+.dt-buttons .buttons-pdf {
+    background-color: #dc3545 !important;
+}
+.dt-buttons .buttons-pdf:hover {
+    background-color: #c82333 !important;
+}
+
+/* Imprimir - gris */
+.dt-buttons .buttons-print {
+    background-color: #6c757d !important;
+}
+.dt-buttons .buttons-print:hover {
+    background-color: #545b62 !important;
+}
+
+/* Tarjetas y tablas */
+.card { border-radius: 12px; }
+.table th { font-weight: 700; font-size: 0.95rem; }
+</style>
+@endpush
 
 @section('js')
 {{-- jsPDF --}}
@@ -110,11 +160,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
 {{-- DataTables + Buttons --}}
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
-<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap5.min.css">
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.bootstrap5.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -259,11 +307,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 responsive: true,
                 dom: 'Bfrtip',
                 buttons: [
-                    { extend: 'copy', text: '<i class="fas fa-copy"></i> Copiar', className: 'btn btn-success btn-sm' },
-                    { extend: 'csv', text: '<i class="fas fa-file-csv"></i> CSV', className: 'btn btn-success btn-sm' },
-                    { extend: 'excel', text: '<i class="fas fa-file-excel"></i> Excel', className: 'btn btn-success btn-sm' },
-                    { extend: 'pdf', text: '<i class="fas fa-file-pdf"></i> PDF', className: 'btn btn-success btn-sm' },
-                    { extend: 'print', text: '<i class="fas fa-print"></i> Imprimir', className: 'btn btn-success btn-sm' }
+                    { extend: 'excelHtml5', text: '<i class="fas fa-file-excel"></i> Excel', className: 'btn btn-success btn-sm buttons-excel' },
+                    { extend: 'pdfHtml5', text: '<i class="fas fa-file-pdf"></i> PDF', className: 'btn btn-danger btn-sm buttons-pdf', orientation: 'landscape', pageSize: 'A4' },
+                    { extend: 'print', text: '<i class="fas fa-print"></i> Imprimir', className: 'btn btn-secondary btn-sm buttons-print' }
                 ],
                 language: { url: "https://cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json" },
                 order: [[1, 'asc']]
@@ -277,9 +323,9 @@ document.addEventListener('DOMContentLoaded', function () {
     // Exportar PDF manual
     btnPDF.addEventListener('click', () => {
         const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('p', 'pt', 'a4');
+        const doc = new jsPDF('l', 'pt', 'a4');
         doc.setFontSize(16).setTextColor(40, 167, 69);
-        doc.text("Reporte de Rotación por Agricultor", 300, 40, { align: "center" });
+        doc.text("Reporte de Rotación por Agricultor", 420, 40, { align: "center" });
         doc.setFontSize(11).setTextColor(0, 0, 0);
         doc.text(`Agricultor: ${impAgricultor.textContent}`, 40, 70);
         doc.text(`Parcela: ${impParcela.textContent}`, 40, 90);
@@ -288,8 +334,8 @@ document.addEventListener('DOMContentLoaded', function () {
             html: '#tablaDatos',
             startY: 130,
             theme: 'grid',
-            styles: { halign: 'center', valign: 'middle', fontSize: 8 },
-            headStyles: { fillColor: [40, 167, 69], textColor: 255, fontStyle: 'bold' },
+            styles: { halign: 'center', valign: 'middle', fontSize: 9 },
+            headStyles: { fillColor: [40, 167, 69], textColor: 255 }
         });
         doc.save(`Rotacion_${impAgricultor.textContent.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`);
     });
@@ -310,20 +356,4 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 </script>
-
-<style>
-.card { border-radius: 12px; }
-.table th { font-weight: 700; font-size: 0.95rem; }
-.dt-buttons .btn {
-    margin-right: 0.3rem;
-    border-radius: 8px;
-}
-.dt-buttons .btn-success {
-    background-color: #198754;
-    border: none;
-}
-.dt-buttons .btn-success:hover {
-    background-color: #157347;
-}
-</style>
 @stop

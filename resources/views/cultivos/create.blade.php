@@ -7,7 +7,7 @@
 @stop
 
 @section('content')
-<div class="card">
+<div class="card shadow">
     <div class="card-body">
         @if($errors->any())
             <div class="alert alert-danger">
@@ -21,7 +21,7 @@
             <div class="form-row">
                 <div class="form-group col-md-6">
                     <label><i class="fas fa-leaf"></i> Nombre del Cultivo</label>
-                    <input type="text" name="nombre" class="form-control" required>
+                    <input type="text" name="nombre" class="form-control" value="{{ old('nombre') }}" required>
                 </div>
 
                 <div class="form-group col-md-6">
@@ -52,33 +52,66 @@
                 </div>
                 <div class="form-group col-md-4">
                     <label><i class="fas fa-calendar-alt"></i> Días de Cultivo</label>
-                    <input type="number" name="diasCultivo" class="form-control" min="1" required>
+                    <input type="number" name="diasCultivo" class="form-control" min="1" value="{{ old('diasCultivo') }}" required>
                 </div>
                 <div class="form-group col-md-4">
                     <label><i class="fas fa-leaf"></i> Variedad</label>
-                    <input type="text" name="variedad" class="form-control">
+                    <input type="text" name="variedad" class="form-control" value="{{ old('variedad') }}">
                 </div>
             </div>
+
+            @php
+                $meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+            @endphp
 
             <div class="form-row">
                 <div class="form-group col-md-6">
                     <label><i class="fas fa-seedling"></i> Época de Siembra</label>
-                    <input type="text" name="epocaSiembra" class="form-control" required>
+                    <div class="d-flex align-items-center">
+                        <select name="siembra_inicio" class="form-control mr-2" required>
+                            <option value="">Mes inicio</option>
+                            @foreach($meses as $mes)
+                                <option value="{{ $mes }}">{{ ucfirst($mes) }}</option>
+                            @endforeach
+                        </select>
+                        <span class="mx-1"> - </span>
+                        <select name="siembra_fin" class="form-control ml-2" required>
+                            <option value="">Mes fin</option>
+                            @foreach($meses as $mes)
+                                <option value="{{ $mes }}">{{ ucfirst($mes) }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
+
                 <div class="form-group col-md-6">
                     <label><i class="fas fa-tractor"></i> Época de Cosecha</label>
-                    <input type="text" name="epocaCosecha" class="form-control" required>
+                    <div class="d-flex align-items-center">
+                        <select name="cosecha_inicio" class="form-control mr-2" required>
+                            <option value="">Mes inicio</option>
+                            @foreach($meses as $mes)
+                                <option value="{{ $mes }}">{{ ucfirst($mes) }}</option>
+                            @endforeach
+                        </select>
+                        <span class="mx-1"> - </span>
+                        <select name="cosecha_fin" class="form-control ml-2" required>
+                            <option value="">Mes fin</option>
+                            @foreach($meses as $mes)
+                                <option value="{{ $mes }}">{{ ucfirst($mes) }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
             </div>
 
             <div class="form-group">
                 <label><i class="fas fa-align-left"></i> Descripción</label>
-                <textarea name="descripcion" class="form-control" rows="3"></textarea>
+                <textarea name="descripcion" class="form-control" rows="3">{{ old('descripcion') }}</textarea>
             </div>
 
             <div class="form-group">
                 <label><i class="fas fa-lightbulb"></i> Recomendaciones</label>
-                <textarea name="recomendaciones" class="form-control" rows="3"></textarea>
+                <textarea name="recomendaciones" class="form-control" rows="3">{{ old('recomendaciones') }}</textarea>
             </div>
 
             <div class="form-group">

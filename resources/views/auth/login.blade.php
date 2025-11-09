@@ -53,7 +53,8 @@
                 </div>
             </div>
         </div>
-        {{-- Captcha: solo a partir del 3er intento fallido --}}
+
+        {{-- Captcha --}}
         @php
             $limiter = app(\Illuminate\Cache\RateLimiter::class);
             $showCaptcha = $limiter->attempts(old('email') . '|' . request()->ip()) >= 2;
@@ -94,9 +95,32 @@
 <style>
     /* Fondo */
     body.login-page {
+        position: relative;
         background: url('{{ asset('images/fondo_andino.png') }}') no-repeat center center fixed;
         background-size: cover;
         font-family: 'Nunito', sans-serif;
+        overflow: hidden;
+    }
+
+    /* 🌿 Efecto translúcido tipo "vidrio esmerilado" */
+    body.login-page::before {
+        content: "";
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        backdrop-filter: blur(1px);
+        -webkit-backdrop-filter: blur(6px); /* soporte Chrome/Safari */
+        background: rgba(255, 255, 255, 0.45);
+        z-index: 0;
+    }
+
+    /* Mantener contenido encima del blur */
+    .login-box,
+    .login-logo,
+    .login-card-body,
+    .card {
+        position: relative;
+        z-index: 1;
     }
 
     /* Ocultar logo AdminLTE original */
@@ -106,9 +130,10 @@
 
     /* Card translúcido */
     .login-card-body, .card {
-        background: rgba(255, 255, 255, 0.7) !important;
+        background: rgba(255, 255, 255, 0.3) !important;
         border-radius: 15px;
         backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
         box-shadow: 0 6px 18px rgba(0,0,0,0.25);
     }
 
@@ -160,6 +185,11 @@
 
     /* Responsividad */
     @media (max-width: 768px) {
+        body.login-page::before {
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            background: rgba(255, 255, 255, 0.5);
+        }
         .logo-wasawayu {
             width: 150px;
         }

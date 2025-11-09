@@ -53,7 +53,7 @@
             <!-- Tipo de suelo -->
             <li class="list-group-item bg-transparent">
                 <strong>Tipo de suelo:</strong> 
-                {{ $detalle->plan->parcela->tipo_suelo ?? 'No especificado' }}
+                {{ $detalle->plan->parcela->tipoSuelo ?? 'No especificado' }}
             </li>
 
             <!-- Fechas de planificación -->

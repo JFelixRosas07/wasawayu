@@ -12,13 +12,20 @@
 @stop
 
 @section('content')
-<div class="card">
+<div class="card shadow">
     <div class="card-body">
         @if($errors->any())
             <div class="alert alert-danger">
                 <ul class="mb-0">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul>
             </div>
         @endif
+
+        @php
+            // separar las épocas actuales (ejemplo: "julio - agosto")
+            $siembra = explode(' - ', $cultivo->epocaSiembra);
+            $cosecha = explode(' - ', $cultivo->epocaCosecha);
+            $meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+        @endphp
 
         <form action="{{ route('cultivos.update', $cultivo) }}" method="POST" enctype="multipart/form-data">
             @csrf
@@ -54,24 +61,64 @@
                         <option value="regenerativa" {{ $cultivo->cargaSuelo == 'regenerativa' ? 'selected' : '' }}>Regenerativa</option>
                     </select>
                 </div>
+
                 <div class="form-group col-md-4">
                     <label><i class="fas fa-calendar-alt"></i> Días de Cultivo</label>
                     <input type="number" name="diasCultivo" class="form-control" value="{{ old('diasCultivo', $cultivo->diasCultivo) }}" required>
                 </div>
+
                 <div class="form-group col-md-4">
                     <label><i class="fas fa-leaf"></i> Variedad</label>
                     <input type="text" name="variedad" class="form-control" value="{{ old('variedad', $cultivo->variedad) }}">
                 </div>
             </div>
 
+            {{-- Epocas --}}
             <div class="form-row">
                 <div class="form-group col-md-6">
                     <label><i class="fas fa-seedling"></i> Época de Siembra</label>
-                    <input type="text" name="epocaSiembra" class="form-control" value="{{ old('epocaSiembra', $cultivo->epocaSiembra) }}" required>
+                    <div class="d-flex align-items-center">
+                        <select name="siembra_inicio" class="form-control mr-2" required>
+                            <option value="">Mes inicio</option>
+                            @foreach($meses as $mes)
+                                <option value="{{ $mes }}" {{ (isset($siembra[0]) && $siembra[0] == $mes) ? 'selected' : '' }}>
+                                    {{ ucfirst($mes) }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <span class="mx-1"> - </span>
+                        <select name="siembra_fin" class="form-control ml-2" required>
+                            <option value="">Mes fin</option>
+                            @foreach($meses as $mes)
+                                <option value="{{ $mes }}" {{ (isset($siembra[1]) && $siembra[1] == $mes) ? 'selected' : '' }}>
+                                    {{ ucfirst($mes) }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
+
                 <div class="form-group col-md-6">
                     <label><i class="fas fa-tractor"></i> Época de Cosecha</label>
-                    <input type="text" name="epocaCosecha" class="form-control" value="{{ old('epocaCosecha', $cultivo->epocaCosecha) }}" required>
+                    <div class="d-flex align-items-center">
+                        <select name="cosecha_inicio" class="form-control mr-2" required>
+                            <option value="">Mes inicio</option>
+                            @foreach($meses as $mes)
+                                <option value="{{ $mes }}" {{ (isset($cosecha[0]) && $cosecha[0] == $mes) ? 'selected' : '' }}>
+                                    {{ ucfirst($mes) }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <span class="mx-1"> - </span>
+                        <select name="cosecha_fin" class="form-control ml-2" required>
+                            <option value="">Mes fin</option>
+                            @foreach($meses as $mes)
+                                <option value="{{ $mes }}" {{ (isset($cosecha[1]) && $cosecha[1] == $mes) ? 'selected' : '' }}>
+                                    {{ ucfirst($mes) }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
             </div>
 
@@ -112,8 +159,6 @@
 
 @section('css')
 <style>
-    .btn {
-        margin-right: 5px;
-    }
+    .btn { margin-right: 5px; }
 </style>
 @stop

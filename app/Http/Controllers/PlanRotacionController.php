@@ -227,23 +227,32 @@ class PlanRotacionController extends Controller
 
     // eliminar plan
     public function destroy(Request $request, $plan_id)
-    {
-        $plan = PlanRotacion::findOrFail($plan_id);
-        $parcelaId = $request->get('parcela_id');
+{
+    $plan = PlanRotacion::with('detalles.ejecuciones')->findOrFail($plan_id);
+    $parcelaId = $request->get('parcela_id');
 
-        if (!$plan->puedeEliminar()) {
-            return back()->withErrors([
-                'error' => 'no se puede eliminar este plan porque tiene ejecuciones registradas.'
-            ]);
+    try {
+        // eliminar ejecuciones y detalles asociados antes del plan
+        foreach ($plan->detalles as $detalle) {
+            $detalle->ejecuciones()->delete();
+            $detalle->delete();
         }
 
+        // eliminar el plan
         $nombrePlan = $plan->nombre;
         $plan->delete();
 
         return redirect()
             ->route('planes.index', ['parcela_id' => $parcelaId])
-            ->with('success', "plan '{$nombrePlan}' eliminado correctamente.");
+            ->with('success', "plan '{$nombrePlan}' eliminado correctamente junto con sus registros asociados.");
+
+    } catch (\Exception $e) {
+        return back()->withErrors([
+            'error' => 'Ocurrió un error al eliminar el plan: ' . $e->getMessage(),
+        ]);
     }
+}
+
 
     // cambiar estado de un plan manualmente
     public function cambiarEstado(Request $request, $plan_id)

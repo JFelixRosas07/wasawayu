@@ -1,27 +1,28 @@
 @extends('adminlte::page')
 
-@section('title', 'Distribución de Cultivos Activos')
+@section('title', 'Reporte de Cultivos')
 
 @section('content_header')
-<h1 class="text-success">
-    <i class="fas fa-seedling me-2"></i> Distribución de Cultivos Activos del Sistema
+<h1 class="text-success fw-bold display-6">
+    <i class="fas fa-seedling me-2"></i>Reporte de Cultivos Activos
 </h1>
 @stop
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <a href="{{ route('reportes.index') }}" class="btn btn-success">
-        <i class="fas fa-arrow-left me-1"></i> Volver al Dashboard
+{{-- Botones principales --}}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <a href="{{ route('reportes.index') }}" class="btn btn-success btn-lg">
+        <i class="fas fa-arrow-left me-2"></i> Volver al Dashboard
     </a>
-    <button id="btnPDF" class="btn btn-success" disabled>
-        <i class="fas fa-file-pdf me-1"></i> Exportar PDF
+    <button id="btnPDF" class="btn btn-success btn-lg" disabled>
+        <i class="fas fa-file-pdf me-2"></i> Exportar PDF
     </button>
 </div>
 
-{{-- Distribución de Cultivos --}}
-<div class="card shadow-sm border-0 mb-4">
-    <div class="card-header bg-success text-white fw-bold">
-        <i class="fas fa-chart-pie me-2"></i> Distribución de Cultivos Activos
+{{-- Tarjeta del gráfico --}}
+<div class="card shadow-lg border-0 mb-4">
+    <div class="card-header bg-success text-white fw-bold py-3">
+        <i class="fas fa-chart-pie me-2"></i>Distribución de Cultivos Activos
     </div>
     <div class="card-body">
         <div id="graficoCultivos" style="height: 400px;"></div>
@@ -31,34 +32,82 @@
     </div>
 </div>
 
-{{-- Tabla de Cultivos --}}
-<div id="tablaCultivos" class="mt-4" style="display:none;">
-    <div class="card shadow-sm border-0">
-        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
-            <strong>Participación de Cultivos</strong>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-bordered table-striped align-middle text-center" id="tablaDatos">
-                    <thead class="bg-success text-white">
-                        <tr>
-                            <th>Nombre</th>
-                            <th>Categoría</th>
-                            <th>Variedad</th>
-                            <th>Carga Suelo</th>
-                            <th>Época Siembra</th>
-                            <th>Época Cosecha</th>
-                            <th>Cantidad de Usos</th>
-                            <th>% de Participación</th>
-                        </tr>
-                    </thead>
-                    <tbody id="cultivosBody"></tbody>
-                </table>
-            </div>
+{{-- Tarjeta de la tabla --}}
+<div class="card border-success shadow-sm" id="contenedorTabla" style="display:none;">
+    <div class="card-header bg-light border-success py-3">
+        <h5 class="mb-0 text-success fw-bold">
+            <i class="fas fa-table me-2"></i>Detalle de Cultivos
+            <span class="badge bg-success text-white ms-2" id="contadorResultados">0 registros</span>
+        </h5>
+    </div>
+
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table id="tablaCultivos" class="table table-striped table-bordered table-hover align-middle mb-0">
+                <thead class="bg-success text-white">
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Categoría</th>
+                        <th>Variedad</th>
+                        <th>Carga Suelo</th>
+                        <th>Época Siembra</th>
+                        <th>Época Cosecha</th>
+                        <th>Cantidad de Usos</th>
+                        <th>% de Participación</th>
+                    </tr>
+                </thead>
+                <tbody id="cultivosBody"></tbody>
+            </table>
         </div>
     </div>
 </div>
 @stop
+
+@push('css')
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap5.min.css">
+
+<style>
+/* === Botones DataTables === */
+.dt-buttons .btn {
+    margin-right: 5px;
+    border-radius: 4px;
+    font-size: 14px;
+    padding: 6px 12px;
+    border: none;
+    color: white !important;
+    font-weight: 500;
+}
+
+/* Excel - verde */
+.dt-buttons .buttons-excel {
+    background-color: #28a745 !important;
+}
+.dt-buttons .buttons-excel:hover {
+    background-color: #218838 !important;
+}
+
+/* PDF - rojo */
+.dt-buttons .buttons-pdf {
+    background-color: #dc3545 !important;
+}
+.dt-buttons .buttons-pdf:hover {
+    background-color: #c82333 !important;
+}
+
+/* Imprimir - gris */
+.dt-buttons .buttons-print {
+    background-color: #6c757d !important;
+}
+.dt-buttons .buttons-print:hover {
+    background-color: #545b62 !important;
+}
+
+/* Tarjetas y tablas */
+.card { border-radius: 12px; }
+.table th { font-weight: 700; font-size: 0.95rem; }
+</style>
+@endpush
 
 @section('js')
 {{-- Librerías principales --}}
@@ -67,11 +116,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
 {{-- DataTables + Buttons --}}
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
-<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap5.min.css">
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.bootstrap5.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -83,7 +130,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', async function () {
     const cultivosBody = document.getElementById('cultivosBody');
-    const tablaCultivos = document.getElementById('tablaCultivos');
+    const contenedorTabla = document.getElementById('contenedorTabla');
     const btnPDF = document.getElementById('btnPDF');
     const graficoCultivos = echarts.init(document.getElementById('graficoCultivos'));
 
@@ -97,7 +144,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             return;
         }
 
-        // === LLENAR TABLA ===
+        // === Llenar tabla ===
         cultivosBody.innerHTML = data.map(c => `
             <tr>
                 <td><strong class="text-success">${c.nombre}</strong></td>
@@ -111,34 +158,30 @@ document.addEventListener('DOMContentLoaded', async function () {
             </tr>
         `).join('');
 
-        tablaCultivos.style.display = 'block';
+        contenedorTabla.style.display = 'block';
         btnPDF.disabled = false;
+        document.getElementById('contadorResultados').textContent = `${data.length} registros`;
 
-        // === INICIALIZAR DATATABLE ===
-        if ($.fn.DataTable.isDataTable('#tablaDatos')) {
-            $('#tablaDatos').DataTable().destroy();
+        // === Inicializar DataTable ===
+        if ($.fn.DataTable.isDataTable('#tablaCultivos')) {
+            $('#tablaCultivos').DataTable().destroy();
         }
 
-        $('#tablaDatos').DataTable({
+        $('#tablaCultivos').DataTable({
             pageLength: 10,
             responsive: true,
             dom: 'Bfrtip',
             buttons: [
-                { extend: 'copy', text: '<i class="fas fa-copy"></i> Copiar', className: 'btn btn-success btn-sm' },
-                { extend: 'csv', text: '<i class="fas fa-file-csv"></i> CSV', className: 'btn btn-success btn-sm' },
-                { extend: 'excel', text: '<i class="fas fa-file-excel"></i> Excel', className: 'btn btn-success btn-sm' },
-                { extend: 'pdf', text: '<i class="fas fa-file-pdf"></i> PDF', className: 'btn btn-success btn-sm' },
-                { extend: 'print', text: '<i class="fas fa-print"></i> Imprimir', className: 'btn btn-success btn-sm' }
+                { extend: 'excelHtml5', text: '<i class="fas fa-file-excel"></i> Excel', className: 'btn btn-success btn-sm buttons-excel' },
+                { extend: 'pdfHtml5', text: '<i class="fas fa-file-pdf"></i> PDF', className: 'btn btn-danger btn-sm buttons-pdf', orientation: 'landscape', pageSize: 'A4' },
+                { extend: 'print', text: '<i class="fas fa-print"></i> Imprimir', className: 'btn btn-secondary btn-sm buttons-print' }
             ],
             language: { url: "https://cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json" },
             order: [[7, 'desc']]
         });
 
-        // === GRÁFICO DE DISTRIBUCIÓN ===
-        const graficoData = data.map(c => ({
-            name: c.nombre,
-            value: c.porcentaje
-        }));
+        // === Gráfico de torta ===
+        const graficoData = data.map(c => ({ name: c.nombre, value: c.porcentaje }));
 
         graficoCultivos.setOption({
             tooltip: { trigger: 'item' },
@@ -158,7 +201,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         cultivosBody.innerHTML = `<tr><td colspan="8" class="text-danger">Error al cargar cultivos.</td></tr>`;
     }
 
-    // === GENERAR PDF ===
+    // === Exportar PDF ===
     btnPDF.addEventListener('click', function () {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF('l', 'pt', 'a4');
@@ -169,7 +212,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         doc.text(`Fecha: ${new Date().toLocaleDateString()}`, 40, 65);
 
         doc.autoTable({
-            html: '#tablaDatos',
+            html: '#tablaCultivos',
             startY: 90,
             theme: 'grid',
             styles: { halign: 'center', valign: 'middle', fontSize: 9 },
@@ -187,21 +230,4 @@ document.addEventListener('DOMContentLoaded', async function () {
     });
 });
 </script>
-
-<style>
-.card { border-radius: 12px; }
-.table th { font-weight: 700; font-size: 0.95rem; }
-.badge { font-size: 0.8rem; }
-.dt-buttons .btn {
-    margin-right: 0.3rem;
-    border-radius: 8px;
-}
-.dt-buttons .btn-success {
-    background-color: #198754;
-    border: none;
-}
-.dt-buttons .btn-success:hover {
-    background-color: #157347;
-}
-</style>
 @stop
